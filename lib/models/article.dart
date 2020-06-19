@@ -29,9 +29,10 @@ class Article {
   factory Article.fromJson(Map<String, dynamic> json) {
     String content = json['content'] != null ? json['content']['rendered'] : "";
 
+    print(json['custom']["featured_image"]);
     String image = json['custom']["featured_image"] != ""
         ? json['custom']["featured_image"]
-        : "https://images.wallpaperscraft.com/image/surface_dark_background_texture_50754_1920x1080.jpg";
+        : "https://flutterblog.crumet.com/wp-content/uploads/2020/06/36852.jpg";
 
     String video = json['custom']["td_video"];
 

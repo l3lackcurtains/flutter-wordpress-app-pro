@@ -1,12 +1,11 @@
-import 'dart:convert';
-import 'dart:io';
-
+import 'package:dio/dio.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
+import 'package:flutter_wordpress_app/common/helpers.dart';
 import 'package:flutter_wordpress_app/models/Article.dart';
 import 'package:flutter_wordpress_app/pages/single_Article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
-import 'package:http/http.dart' as http;
 import 'package:loading/indicator/ball_beat_indicator.dart';
 import 'package:loading/loading.dart';
 
@@ -42,19 +41,21 @@ class _CategoryArticlesState extends State<CategoryArticles> {
   }
 
   Future<List<dynamic>> fetchCategoryArticles(int page) async {
-    try {
-      var response = await http.get(
-          "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=" +
-              widget.id.toString() +
-              "&page=$page&per_page=10&_fields=id,date,title,content,custom,link");
+    if (this.mounted) {
+      try {
+        String requestUrl = "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=" +
+            widget.id.toString() +
+            "&page=$page&per_page=10&_fields=id,date,title,content,custom,link";
+        Response response = await customDio.get(
+          requestUrl,
+          options: buildCacheOptions(Duration(days: 3),
+              maxStale: Duration(days: 7), forceRefresh: false),
+        );
 
-      if (this.mounted) {
         if (response.statusCode == 200) {
           setState(() {
-            categoryArticles.addAll(json
-                .decode(response.body)
-                .map((m) => Article.fromJson(m))
-                .toList());
+            categoryArticles
+                .addAll(response.data.map((m) => Article.fromJson(m)).toList());
             if (categoryArticles.length % 10 != 0) {
               _infiniteStop = true;
             }
@@ -62,12 +63,27 @@ class _CategoryArticlesState extends State<CategoryArticles> {
 
           return categoryArticles;
         }
-        setState(() {
-          _infiniteStop = true;
-        });
+      } on DioError catch (e) {
+        if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
+            DioErrorType.CONNECT_TIMEOUT == e.type) {
+          throw ("Server is not reachable. Please verify your internet connection and try again");
+        } else if (DioErrorType.RESPONSE == e.type) {
+          if (e.response.statusCode == 400) {
+            setState(() {
+              _infiniteStop = true;
+            });
+          } else {
+            print(e.message);
+            print(e.request);
+          }
+        } else if (DioErrorType.DEFAULT == e.type) {
+          if (e.message.contains('SocketException')) {
+            throw ('No Internet Connection.');
+          }
+        } else {
+          throw ("Problem connecting to the server. Please try again.");
+        }
       }
-    } on SocketException {
-      throw 'No Internet connection';
     }
     return categoryArticles;
   }

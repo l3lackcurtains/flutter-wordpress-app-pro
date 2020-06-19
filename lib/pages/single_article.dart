@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:flutter_wordpress_app/blocs/favArticleBloc.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
+import 'package:flutter_wordpress_app/common/helpers.dart';
 import 'package:flutter_wordpress_app/models/Article.dart';
 import 'package:flutter_wordpress_app/pages/comments.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:html/dom.dart' as dom;
-import 'package:http/http.dart' as http;
 import 'package:loading/indicator/ball_beat_indicator.dart';
 import 'package:loading/loading.dart';
 import 'package:share/share.dart';
@@ -44,26 +45,29 @@ class _SingleArticleState extends State<SingleArticle> {
   }
 
   Future<List<dynamic>> fetchRelatedArticles() async {
-    try {
-      int postId = widget.article.id;
-      int catId = widget.article.catId;
-      var response = await http.get(
-          "$WORDPRESS_URL/wp-json/wp/v2/posts?exclude=$postId&categories[]=$catId&per_page=3");
+    if (this.mounted) {
+      try {
+        int postId = widget.article.id;
+        int catId = widget.article.catId;
 
-      if (this.mounted) {
+        String requestUrl =
+            "$WORDPRESS_URL/wp-json/wp/v2/posts?exclude=$postId&categories[]=$catId&per_page=3";
+        Response response = await customDio.get(
+          requestUrl,
+          options: buildCacheOptions(Duration(days: 3),
+              maxStale: Duration(days: 7), forceRefresh: false),
+        );
         if (response.statusCode == 200) {
           setState(() {
-            relatedArticles = json
-                .decode(response.body)
-                .map((m) => Article.fromJson(m))
-                .toList();
+            relatedArticles =
+                response.data.map((m) => Article.fromJson(m)).toList();
           });
 
           return relatedArticles;
         }
+      } on DioError catch (e) {
+        print(e);
       }
-    } on SocketException {
-      throw 'No Internet connection';
     }
     return relatedArticles;
   }
@@ -164,8 +168,18 @@ class _SingleArticleState extends State<SingleArticle> {
                                               webView: true,
                                             ),
                                           )
-                                : Image.network(
-                                    article.image,
+                                : CachedNetworkImage(
+                                    imageUrl: article.image,
+                                    placeholder: (context, url) => Container(
+                                        alignment: Alignment.center,
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                            strokeWidth: 6,
+                                            backgroundColor: Theme.of(context)
+                                                .secondaryHeaderColor)),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
                                     fit: BoxFit.cover,
                                   ),
                           ),

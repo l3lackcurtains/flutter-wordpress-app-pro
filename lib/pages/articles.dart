@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
+import 'package:flutter_wordpress_app/common/helpers.dart';
 import 'package:flutter_wordpress_app/models/Article.dart';
 import 'package:flutter_wordpress_app/pages/single_Article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
@@ -30,11 +33,34 @@ class _ArticlesState extends State<Articles> {
   void initState() {
     super.initState();
     _futureLastestArticles = fetchLatestArticles(1);
-    _futureFeaturedArticles = fetchFeaturedArticles(1);
+    _futureFeaturedArticles = fetchFeaturedArticles();
     _controller =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
     _controller.addListener(_scrollListener);
     _infiniteStop = false;
+  }
+
+  void _checkforForceUpdate(int lastId) async {
+    try {
+      String requestUrl =
+          "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=1&_fields=id";
+      var response = await http.get(
+        requestUrl,
+      );
+
+      if (response.statusCode == 200) {
+        if (json.decode(response.body)[0]['id'] != lastId) {
+          customDioCacheManager.clearAll();
+          setState(() {
+            latestArticles = [];
+            page = 1;
+            _futureLastestArticles = fetchLatestArticles(page);
+          });
+        }
+      }
+    } on SocketException {
+      print('No Internet connection');
+    }
   }
 
   @override
@@ -44,55 +70,75 @@ class _ArticlesState extends State<Articles> {
   }
 
   Future<List<dynamic>> fetchLatestArticles(int page) async {
-    try {
-      var response = await http.get(
-          '$WORDPRESS_URL/wp-json/wp/v2/posts/?page=$page&per_page=10&_fields=id,date,title,content,custom,link');
-      if (this.mounted) {
+    if (this.mounted) {
+      try {
+        String requestUrl =
+            "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=10&_fields=id,date,title,content,custom,link";
+        Response response = await customDio.get(
+          requestUrl,
+          options:
+              buildCacheOptions(Duration(days: 3), maxStale: Duration(days: 7)),
+        );
+
         if (response.statusCode == 200) {
           setState(() {
-            latestArticles.addAll(json
-                .decode(response.body)
-                .map((m) => Article.fromJson(m))
-                .toList());
+            latestArticles
+                .addAll(response.data.map((m) => Article.fromJson(m)).toList());
             if (latestArticles.length % 10 != 0) {
               _infiniteStop = true;
             }
           });
+          if (page == 1) {
+            _checkforForceUpdate(latestArticles[0].id);
+          }
+
           return latestArticles;
         }
-        setState(() {
-          _infiniteStop = true;
-        });
+      } on DioError catch (e) {
+        if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
+            DioErrorType.CONNECT_TIMEOUT == e.type) {
+          throw ("Server is not reachable. Please verify your internet connection and try again");
+        } else if (DioErrorType.RESPONSE == e.type) {
+          if (e.response.statusCode == 400) {
+            setState(() {
+              _infiniteStop = true;
+            });
+          } else {
+            print(e.message);
+            print(e.request);
+          }
+        } else if (DioErrorType.DEFAULT == e.type) {
+          if (e.message.contains('SocketException')) {
+            throw ('No Internet Connection.');
+          }
+        } else {
+          throw ("Problem connecting to the server. Please try again.");
+        }
       }
-    } on SocketException {
-      throw 'No Internet connection';
     }
     return latestArticles;
   }
 
-  Future<List<dynamic>> fetchFeaturedArticles(int page) async {
+  Future<List<dynamic>> fetchFeaturedArticles() async {
     try {
-      var response = await http.get(
-          "$WORDPRESS_URL/wp-json/wp/v2/posts/?categories[]=$FEATURED_ID&page=$page&per_page=10&_fields=id,date,title,content,custom,link");
+      String requestUrl =
+          "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=$FEATURED_ID&per_page=10&_fields=id,date,title,content,custom,link,liveblog";
+      Response response = await customDio.get(
+        requestUrl,
+        options: buildCacheOptions(Duration(days: 3),
+            maxStale: Duration(days: 7), forceRefresh: false),
+      );
 
-      if (this.mounted) {
-        if (response.statusCode == 200) {
-          setState(() {
-            featuredArticles.addAll(json
-                .decode(response.body)
-                .map((m) => Article.fromJson(m))
-                .toList());
-          });
-
-          return featuredArticles;
-        } else {
-          setState(() {
-            _infiniteStop = true;
-          });
-        }
+      if (this.mounted && response.statusCode == 200) {
+        setState(() {
+          featuredArticles
+              .addAll(response.data.map((m) => Article.fromJson(m)).toList());
+        });
+        return featuredArticles;
       }
-    } on SocketException {
-      throw 'No Internet connection';
+    } on DioError catch (e) {
+      print(e.message);
+      print(e.request);
     }
     return featuredArticles;
   }
@@ -170,7 +216,10 @@ class _ArticlesState extends State<Articles> {
             ],
           );
         } else if (articleSnapshot.hasError) {
-          return Container();
+          return Container(
+              height: 300,
+              alignment: Alignment.center,
+              child: Text("${articleSnapshot.error}"));
         }
         return Container(
             alignment: Alignment.center,
@@ -223,8 +272,8 @@ class _ArticlesState extends State<Articles> {
                     icon: Icon(Icons.refresh),
                     label: Text("Reload"),
                     onPressed: () {
-                      _futureLastestArticles = fetchLatestArticles(1);
-                      _futureFeaturedArticles = fetchFeaturedArticles(1);
+                      _futureLastestArticles = fetchLatestArticles(page);
+                      _futureFeaturedArticles = fetchFeaturedArticles();
                     },
                   )
                 ],

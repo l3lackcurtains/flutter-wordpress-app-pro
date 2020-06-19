@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_wordpress_app/models/Article.dart';
@@ -103,8 +104,17 @@ Widget articleBox(BuildContext context, Article article, String heroId) {
               tag: heroId,
               child: ClipRRect(
                 borderRadius: new BorderRadius.circular(8.0),
-                child: Image.network(
-                  article.image,
+                child: CachedNetworkImage(
+                  imageUrl: article.image,
+                  placeholder: (context, url) => Container(
+                      alignment: Alignment.center,
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 6,
+                          backgroundColor:
+                              Theme.of(context).secondaryHeaderColor)),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                   fit: BoxFit.cover,
                 ),
               ),
