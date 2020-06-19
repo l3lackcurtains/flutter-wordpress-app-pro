@@ -1,0 +1,74 @@
+name: flutter_wordpress_app
+description: Flutter news app for wordpress platform
+
+version: 1.0.0+4
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.2
+  url_launcher: ^5.0.2
+  http: ^0.12.0+2
+  html: ^0.14.0+3
+  flutter_html: ^0.11.0
+  dio: ^3.0.6
+  loading: ^1.0.2
+  intl: ^0.16.0
+  share: ^0.6.3+3
+  path_provider: ^1.4.5
+  sqflite: ^1.1.7+3
+  firebase_messaging: ^5.0.1
+  shared_preferences: ^0.5.6
+  flutter_widget_from_html: ^0.4.1
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_launcher_icons: "^0.7.3"
+
+flutter_icons:
+  android: "launcher_icon" 
+  ios: true
+  image_path: assets/launcher_icon.png
+
+
+flutter:
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+
+  uses-material-design: true
+
+  assets:
+    - assets/icon.png
+    - assets/no-internet.png
+    - assets/play-button.png
+    - assets/boxed/fashion.png
+    - assets/boxed/health.png
+    - assets/boxed/lifestyle.png
+    - assets/boxed/music.png
+    - assets/boxed/photography.png
+    - assets/boxed/recipies.png
+    - assets/boxed/sport.png
+    - assets/boxed/travel.png
+    - assets/boxed/world.png
+    - assets/more/favourite.png
+    - assets/more/contact.png
+    - assets/more/share.png
+    - assets/more/notification.png
+    
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins/Poppins-Bold.ttf
+  
+    - family: Soleil
+      fonts:
+        - asset: fonts/Soleil/Soleil-Bold.otf
+        - asset: fonts/Soleil/Soleil-Regular.otf
