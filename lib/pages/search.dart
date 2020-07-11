@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:flutter_wordpress_app/pages/single_article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:flutter_wordpress_app/widgets/searchBoxes.dart';
@@ -180,21 +180,25 @@ class _SearchState extends State<Search> {
           }
           return Column(
             children: <Widget>[
-              Column(
-                  children: articleSnapshot.data.map((item) {
-                final heroId = item.id.toString() + "-searched";
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SingleArticle(item, heroId),
-                      ),
+              ListView.builder(
+                  itemCount: articleSnapshot.data.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    Article item = articleSnapshot.data[index];
+                    final heroId = item.id.toString() + "-latest";
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SingleArticle(item, heroId),
+                          ),
+                        );
+                      },
+                      child: articleBox(context, item, heroId),
                     );
-                  },
-                  child: articleBox(context, item, heroId),
-                );
-              }).toList()),
+                  }),
               !_infiniteStop
                   ? Container(
                       alignment: Alignment.center,

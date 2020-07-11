@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/blocs/favArticleBloc.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:flutter_wordpress_app/pages/single_Article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:loading/indicator/ball_beat_indicator.dart';

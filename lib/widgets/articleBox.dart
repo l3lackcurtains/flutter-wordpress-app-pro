@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:html/dom.dart' as dom;
 
 Widget articleBox(BuildContext context, Article article, String heroId) {

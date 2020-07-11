@@ -3,7 +3,7 @@ import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
 import 'package:flutter_wordpress_app/common/helpers.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:flutter_wordpress_app/pages/single_Article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:loading/indicator/ball_beat_indicator.dart';
@@ -140,21 +140,25 @@ class _CategoryArticlesState extends State<CategoryArticles> {
           if (articleSnapshot.data.length == 0) return Container();
           return Column(
             children: <Widget>[
-              Column(
-                  children: articleSnapshot.data.map((item) {
-                final heroId = item.id.toString() + "-categorypost";
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SingleArticle(item, heroId),
-                      ),
+              ListView.builder(
+                  itemCount: articleSnapshot.data.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    Article item = articleSnapshot.data[index];
+                    final heroId = item.id.toString() + "-latest";
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SingleArticle(item, heroId),
+                          ),
+                        );
+                      },
+                      child: articleBox(context, item, heroId),
                     );
-                  },
-                  child: articleBox(context, item, heroId),
-                );
-              }).toList()),
+                  }),
               !_infiniteStop
                   ? Container(
                       alignment: Alignment.center,

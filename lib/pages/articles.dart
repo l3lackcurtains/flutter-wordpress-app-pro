@@ -7,7 +7,7 @@ import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
 import 'package:flutter_wordpress_app/common/helpers.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:flutter_wordpress_app/pages/single_Article.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:flutter_wordpress_app/widgets/articleBoxFeatured.dart';
@@ -32,7 +32,8 @@ class _ArticlesState extends State<Articles> {
   @override
   void initState() {
     super.initState();
-    _futureLastestArticles = fetchLatestArticles(1);
+    page = 1;
+    _futureLastestArticles = fetchLatestArticles(page);
     _futureFeaturedArticles = fetchFeaturedArticles();
     _controller =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
@@ -60,6 +61,31 @@ class _ArticlesState extends State<Articles> {
       }
     } on SocketException {
       print('No Internet connection');
+    }
+  }
+
+  Future<Null> _refreshLatestPosts() async {
+    await Future.delayed(Duration(milliseconds: 1000));
+    if (this.mounted) {
+      setState(() {
+        latestArticles = [];
+        page = 1;
+        _futureLastestArticles = fetchLatestArticles(page);
+        _infiniteStop = false;
+      });
+    }
+
+    return null;
+  }
+
+  _scrollListener() {
+    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange;
+    if (isEnd) {
+      setState(() {
+        page += 1;
+        _futureLastestArticles = fetchLatestArticles(page);
+      });
     }
   }
 
@@ -122,7 +148,7 @@ class _ArticlesState extends State<Articles> {
   Future<List<dynamic>> fetchFeaturedArticles() async {
     try {
       String requestUrl =
-          "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=$FEATURED_ID&per_page=10&_fields=id,date,title,content,custom,link,liveblog";
+          "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=$FEATURED_ID&per_page=10&_fields=id,date,title,content,custom,link";
       Response response = await customDio.get(
         requestUrl,
         options: buildCacheOptions(Duration(days: 3),
@@ -141,17 +167,6 @@ class _ArticlesState extends State<Articles> {
       print(e.request);
     }
     return featuredArticles;
-  }
-
-  _scrollListener() {
-    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange;
-    if (isEnd) {
-      setState(() {
-        page += 1;
-        _futureLastestArticles = fetchLatestArticles(page);
-      });
-    }
   }
 
   @override
@@ -189,21 +204,25 @@ class _ArticlesState extends State<Articles> {
           if (articleSnapshot.data.length == 0) return Container();
           return Column(
             children: <Widget>[
-              Column(
-                  children: articleSnapshot.data.map((item) {
-                final heroId = item.id.toString() + "-latest";
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SingleArticle(item, heroId),
-                      ),
+              ListView.builder(
+                  itemCount: articleSnapshot.data.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    Article item = articleSnapshot.data[index];
+                    final heroId = item.id.toString() + "-latest";
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SingleArticle(item, heroId),
+                          ),
+                        );
+                      },
+                      child: articleBox(context, item, heroId),
                     );
-                  },
-                  child: articleBox(context, item, heroId),
-                );
-              }).toList()),
+                  }),
               !_infiniteStop
                   ? Container(
                       alignment: Alignment.center,

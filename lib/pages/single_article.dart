@@ -9,7 +9,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:flutter_wordpress_app/blocs/favArticleBloc.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
 import 'package:flutter_wordpress_app/common/helpers.dart';
-import 'package:flutter_wordpress_app/models/Article.dart';
+import 'package:flutter_wordpress_app/models/article.dart';
 import 'package:flutter_wordpress_app/pages/comments.dart';
 import 'package:flutter_wordpress_app/widgets/articleBox.dart';
 import 'package:html/dom.dart' as dom;
