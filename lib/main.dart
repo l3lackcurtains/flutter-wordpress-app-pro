@@ -1,14 +1,20 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
 import 'package:flutter_wordpress_app/pages/articles.dart';
 import 'package:flutter_wordpress_app/pages/local_articles.dart';
 import 'package:flutter_wordpress_app/pages/search.dart';
 import 'package:flutter_wordpress_app/pages/settings.dart';
+import 'package:flutter_wordpress_app/pages/single_article.dart';
+import 'package:http/http.dart' as http;
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'common/helpers.dart';
+import 'models/article.dart';
 
 void main() => runApp(
       ChangeNotifierProvider<AppStateNotifier>(
@@ -93,7 +99,7 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: Colors.black,
           cardColor: Color(0xFF121212),
         ),
-        themeMode: appState.getThemeMode() ? ThemeMode.dark : ThemeMode.light,
+        themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
         home: MyHomePage(),
       );
     });
@@ -107,9 +113,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // Firebase Cloud Messeging setup
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   int _selectedIndex = 0;
   bool _isLoading = true;
+  Article _notificationArticle;
+
   final List<Widget> _widgetOptions = [
     Articles(),
     LocalArticles(),
@@ -121,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _checkDarkTheme();
+    _startOneSignal();
   }
 
   _checkDarkTheme() async {
@@ -136,45 +144,60 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  startFirebase() async {
+  _startOneSignal() async {
     final prefs = await SharedPreferences.getInstance();
     final key = 'notification';
-    final value = prefs.getInt(key) ?? 0;
-    if (value == 1) {
-      _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(
-                  message["notification"]["title"],
-                  style: TextStyle(fontFamily: "Soleil", fontSize: 18),
-                ),
-                content: Text(message["notification"]["body"]),
-                actions: <Widget>[
-                  FlatButton(
-                    child: new Text("Dismiss"),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        onLaunch: (Map<String, dynamic> message) async {
-          // print("onLaunch: $message");
-        },
-        onResume: (Map<String, dynamic> message) async {
-          // print("onResume: $message");
-        },
-      );
-      _firebaseMessaging.getToken().then((token) {
-        // print("Firebase Token:" + token);
-      });
+    final value = prefs.getInt(key) ?? 1;
+
+    onesignal.init(
+      "45e71839-7d7b-445a-b325-b9009d92171e",
+      iOSSettings: {
+        OSiOSSettings.autoPrompt: true,
+        OSiOSSettings.inAppLaunchUrl: true
+      },
+    );
+    onesignal.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+    onesignal.setInFocusDisplayType(OSNotificationDisplayType.notification);
+
+    await enableNotification(context, value == 1);
+
+    onesignal.setNotificationReceivedHandler((OSNotification notification) {
+      print(notification.jsonRepresentation().replaceAll("\\n", "\n"));
+    });
+
+    onesignal.setNotificationOpenedHandler(
+        (OSNotificationOpenedResult result) async {
+      String postId =
+          result.notification.payload.additionalData['postId'].toString();
+      await _fetchNotificationArticle(postId);
+      if (_notificationArticle != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SingleArticle(_notificationArticle, "123456"),
+          ),
+        );
+      }
+    });
+  }
+
+  Future<Article> _fetchNotificationArticle(String id) async {
+    try {
+      http.Response response =
+          await http.get("$WORDPRESS_URL/wp-json/wp/v2/posts/$id");
+      if (this.mounted) {
+        if (response.statusCode == 200) {
+          Map<String, dynamic> articleRes = json.decode(response.body);
+          setState(() {
+            _notificationArticle = Article.fromJson(articleRes);
+          });
+          return _notificationArticle;
+        }
+      }
+    } on SocketException {
+      throw 'No Internet connection';
     }
+    return _notificationArticle;
   }
 
   @override

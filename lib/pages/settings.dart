@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/helpers.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../main.dart';
 import 'favoutite_articles.dart';
 
 class Settings extends StatefulWidget {
@@ -14,47 +12,9 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  bool _notification = false;
-
   @override
   void initState() {
     super.initState();
-    checkNotificationSetting();
-  }
-
-  checkNotificationSetting() async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'notification';
-    final value = prefs.getInt(key) ?? 0;
-    if (value == 0) {
-      setState(() {
-        _notification = false;
-      });
-    } else {
-      setState(() {
-        _notification = true;
-      });
-    }
-  }
-
-  saveNotificationSetting(bool val) async {
-    final prefs = await SharedPreferences.getInstance();
-    final key = 'notification';
-    final value = val ? 1 : 0;
-    prefs.setInt(key, value);
-    if (value == 1) {
-      setState(() {
-        _notification = true;
-      });
-    } else {
-      setState(() {
-        _notification = false;
-      });
-    }
-    Future.delayed(const Duration(milliseconds: 500), () {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (BuildContext context) => MyHomePage()));
-    });
   }
 
   @override
@@ -188,10 +148,11 @@ class _SettingsState extends State<Settings> {
                       style: Theme.of(context).textTheme.bodyText2),
                   trailing: Switch(
                       onChanged: (val) async {
-                        await saveNotificationSetting(val);
+                        await enableNotification(context, val);
                       },
                       activeColor: Theme.of(context).accentColor,
-                      value: _notification),
+                      value: Provider.of<AppStateNotifier>(context)
+                          .notificationOn),
                 ),
                 ListTile(
                   leading: Image.asset(

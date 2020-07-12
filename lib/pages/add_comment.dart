@@ -50,7 +50,7 @@ class _AddCommentState extends State<AddComment> {
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.close),
-            color: Colors.black,
+            color: Theme.of(context).primaryColorDark,
             onPressed: () {
               Navigator.of(context).pop();
             },

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
@@ -141,7 +143,9 @@ class _CategoryArticlesState extends State<CategoryArticles> {
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     Article item = articleSnapshot.data[index];
-                    final heroId = item.id.toString() + "-latest";
+                    Random random = new Random();
+                    final randNum = random.nextInt(10000);
+                    final heroId = item.id.toString() + randNum.toString();
                     return InkWell(
                       onTap: () {
                         Navigator.push(

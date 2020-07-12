@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
@@ -196,7 +197,9 @@ class _ArticlesState extends State<Articles> {
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     Article item = articleSnapshot.data[index];
-                    final heroId = item.id.toString() + "-latest";
+                    Random random = new Random();
+                    final randNum = random.nextInt(10000);
+                    final heroId = item.id.toString() + randNum.toString();
                     return InkWell(
                       onTap: () {
                         Navigator.push(
@@ -248,7 +251,9 @@ class _ArticlesState extends State<Articles> {
             if (articleSnapshot.data.length == 0) return Container();
             return Row(
                 children: articleSnapshot.data.map((item) {
-              final heroId = item.id.toString() + "-featured";
+              Random random = new Random();
+              final randNum = random.nextInt(10000);
+              final heroId = item.id.toString() + randNum.toString();
               return InkWell(
                   onTap: () {
                     Navigator.push(

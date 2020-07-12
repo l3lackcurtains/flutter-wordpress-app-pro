@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_app/common/constants.dart';
@@ -182,7 +183,9 @@ class _SearchState extends State<Search> {
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
                     Article item = articleSnapshot.data[index];
-                    final heroId = item.id.toString() + "-latest";
+                    Random random = new Random();
+                    final randNum = random.nextInt(10000);
+                    final heroId = item.id.toString() + randNum.toString();
                     return InkWell(
                       onTap: () {
                         Navigator.push(
