@@ -50,19 +50,14 @@ class _CategoriesState extends State<Categories> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Categories',
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'Poppins')),
+        title: Text('Categories', style: Theme.of(context).textTheme.headline2),
         elevation: 5,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).backgroundColor,
       ),
       body: Container(
-        decoration: BoxDecoration(color: Colors.white),
         child: getCategoriesList(_futureCategories),
       ),
     );

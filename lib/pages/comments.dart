@@ -43,22 +43,18 @@ class _CommentsState extends State<Comments> {
   Widget build(BuildContext context) {
     int commentId = widget.commentId;
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.close),
-          color: Colors.black,
+          color: Theme.of(context).primaryColorDark,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        title: const Text('Comments',
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'Poppins')),
+        title: Text('Comments', style: Theme.of(context).textTheme.headline2),
         elevation: 5,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).backgroundColor,
       ),
       body: Container(
         child: SingleChildScrollView(

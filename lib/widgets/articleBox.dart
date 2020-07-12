@@ -53,14 +53,14 @@ Widget articleBox(BuildContext context, Article article, String heroId) {
                             children: <Widget>[
                               Container(
                                 decoration: BoxDecoration(
-                                    color: Color(0xFFE3E3E3),
+                                    color: Theme.of(context).canvasColor,
                                     borderRadius: BorderRadius.circular(3)),
                                 padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                 margin: EdgeInsets.fromLTRB(0, 0, 0, 8),
                                 child: Text(
                                   article.category,
                                   style: TextStyle(
-                                      color: Colors.black,
+                                      color: Theme.of(context).primaryColorDark,
                                       fontSize: 11,
                                       fontWeight: FontWeight.w400),
                                 ),
@@ -71,7 +71,7 @@ Widget articleBox(BuildContext context, Article article, String heroId) {
                                   children: <Widget>[
                                     Icon(
                                       Icons.timer,
-                                      color: Colors.black45,
+                                      color: Theme.of(context).canvasColor,
                                       size: 12.0,
                                     ),
                                     SizedBox(

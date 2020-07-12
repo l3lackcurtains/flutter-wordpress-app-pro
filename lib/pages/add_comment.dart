@@ -46,6 +46,7 @@ class _AddCommentState extends State<AddComment> {
     int commentId = widget.commentId;
 
     return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.close),
@@ -54,14 +55,10 @@ class _AddCommentState extends State<AddComment> {
               Navigator.of(context).pop();
             },
           ),
-          title: Text('Add Comment',
-              style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  fontFamily: 'Poppins')),
+          title:
+              Text('Add Comment', style: Theme.of(context).textTheme.headline2),
           elevation: 5,
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).backgroundColor,
         ),
         body: Builder(builder: (BuildContext context) {
           return Container(

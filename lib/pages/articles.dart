@@ -64,20 +64,6 @@ class _ArticlesState extends State<Articles> {
     }
   }
 
-  Future<Null> _refreshLatestPosts() async {
-    await Future.delayed(Duration(milliseconds: 1000));
-    if (this.mounted) {
-      setState(() {
-        latestArticles = [];
-        page = 1;
-        _futureLastestArticles = fetchLatestArticles(page);
-        _infiniteStop = false;
-      });
-    }
-
-    return null;
-  }
-
   _scrollListener() {
     var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
         !_controller.position.outOfRange;
@@ -172,17 +158,17 @@ class _ArticlesState extends State<Articles> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          title: Image(
-            image: AssetImage('assets/icon.png'),
-            height: 45,
-          ),
-          elevation: 5,
-          backgroundColor: Colors.white,
-        ),
+            title: Image(
+              image: Theme.of(context).brightness == Brightness.light
+                  ? AssetImage('assets/icon.png')
+                  : AssetImage('assets/icon-dark.png'),
+              height: 45,
+            ),
+            elevation: 5,
+            backgroundColor: Theme.of(context).backgroundColor),
         body: Container(
-          decoration: BoxDecoration(color: Colors.white70),
           child: SingleChildScrollView(
             controller: _controller,
             scrollDirection: Axis.vertical,

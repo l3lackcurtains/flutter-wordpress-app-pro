@@ -5,20 +5,32 @@ import 'package:flutter_wordpress_app/pages/articles.dart';
 import 'package:flutter_wordpress_app/pages/local_articles.dart';
 import 'package:flutter_wordpress_app/pages/search.dart';
 import 'package:flutter_wordpress_app/pages/settings.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() => runApp(MyApp());
+import 'common/helpers.dart';
+
+void main() => runApp(
+      ChangeNotifierProvider<AppStateNotifier>(
+        create: (context) => AppStateNotifier(),
+        child: MyApp(),
+      ),
+    );
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return Consumer<AppStateNotifier>(builder: (context, appState, child) {
+      return MaterialApp(
         title: 'Icilome',
         theme: ThemeData(
-          brightness: Brightness.light,
-          primaryColor: Color(0xFF385C7B),
-          accentColor: Color(0xFFE74C3C),
-          textTheme: TextTheme(
+            brightness: Brightness.light,
+            primaryColorLight: Colors.white,
+            primaryColorDark: Colors.black,
+            primaryColor: Color(0xFF385C7B),
+            accentColor: Color(0xFFE74C3C),
+            canvasColor: Color(0xFFE3E3E3),
+            textTheme: TextTheme(
               headline1: TextStyle(
                 fontSize: 17,
                 color: Colors.black,
@@ -26,14 +38,65 @@ class MyApp extends StatelessWidget {
                 fontWeight: FontWeight.w500,
                 fontFamily: "Soleil",
               ),
+              headline2: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontFamily: 'Poppins'),
               caption: TextStyle(color: Colors.black45, fontSize: 10),
               bodyText1: TextStyle(
                 fontSize: 16,
                 height: 1.5,
                 color: Colors.black87,
-              )),
+              ),
+              bodyText2: TextStyle(
+                fontSize: 14,
+                height: 1.2,
+                color: Colors.black54,
+              ),
+            ),
+            backgroundColor: Colors.white,
+            scaffoldBackgroundColor: Colors.white),
+        darkTheme: ThemeData(
+          primaryColorLight: Colors.black,
+          primaryColorDark: Colors.white,
+          primaryColor: Color(0xFF385C7B),
+          accentColor: Color(0xFFE74C3C),
+          brightness: Brightness.dark,
+          canvasColor: Color(0xFF333333),
+          textTheme: TextTheme(
+            headline1: TextStyle(
+              fontSize: 17,
+              color: Colors.white,
+              height: 1.2,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Soleil",
+            ),
+            headline2: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                fontFamily: 'Poppins'),
+            caption: TextStyle(color: Colors.white70, fontSize: 10),
+            bodyText1: TextStyle(
+              fontSize: 16,
+              height: 1.5,
+              color: Colors.white70,
+            ),
+            bodyText2: TextStyle(
+              fontSize: 14,
+              height: 1.2,
+              color: Colors.white70,
+            ),
+          ),
+          backgroundColor: Color(0xFF121212),
+          scaffoldBackgroundColor: Colors.black,
+          cardColor: Color(0xFF121212),
         ),
-        home: MyHomePage());
+        themeMode: appState.getThemeMode() ? ThemeMode.dark : ThemeMode.light,
+        home: MyHomePage(),
+      );
+    });
   }
 }
 
@@ -45,8 +108,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Firebase Cloud Messeging setup
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
   int _selectedIndex = 0;
+  bool _isLoading = true;
   final List<Widget> _widgetOptions = [
     Articles(),
     LocalArticles(),
@@ -57,6 +120,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _checkDarkTheme();
+  }
+
+  _checkDarkTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'darktheme';
+    final platformTheme = MediaQuery.of(context).platformBrightness;
+    final platformThemeCode = platformTheme == Brightness.dark ? 1 : 0;
+    final value = prefs.getInt(key) ?? platformThemeCode;
+    await changeToDarkTheme(context, value == 1);
+    await Future.delayed(Duration(seconds: 1));
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   startFirebase() async {
@@ -102,12 +179,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(backgroundColor: Theme.of(context).primaryColor);
+    }
+
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).backgroundColor,
           selectedLabelStyle:
               TextStyle(fontWeight: FontWeight.w500, fontFamily: "Soleil"),
           unselectedLabelStyle: TextStyle(fontFamily: "Soleil"),

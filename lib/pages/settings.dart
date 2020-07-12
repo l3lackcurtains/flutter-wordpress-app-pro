@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_wordpress_app/common/helpers.dart';
+import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -58,42 +60,44 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'More',
-          style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-              fontFamily: 'Poppins'),
+          style: Theme.of(context).textTheme.headline2,
         ),
         elevation: 5,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).backgroundColor,
       ),
       body: Container(
-        decoration: BoxDecoration(color: Colors.white),
         child: Column(
           children: <Widget>[
             Container(
+              decoration:
+                  BoxDecoration(color: Theme.of(context).backgroundColor),
               alignment: Alignment.center,
               padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
               child: Image(
-                image: AssetImage('assets/icon.png'),
+                image: Theme.of(context).brightness == Brightness.light
+                    ? AssetImage('assets/icon.png')
+                    : AssetImage('assets/icon-dark.png'),
                 height: 50,
               ),
             ),
             Container(
+              decoration:
+                  BoxDecoration(color: Theme.of(context).backgroundColor),
               alignment: Alignment.center,
-              padding: EdgeInsets.fromLTRB(0, 10, 0, 20),
+              padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
               child: Text(
                 "Version 1.0.0 \n flutterblog.crumet.com \n Demo flutter app for wordpress news website",
                 textAlign: TextAlign.center,
-                style: TextStyle(height: 1.6, color: Colors.black87),
+                style: Theme.of(context).textTheme.bodyText2,
               ),
             ),
             Divider(
+              color: Theme.of(context).backgroundColor,
               height: 10,
               thickness: 2,
             ),
@@ -115,7 +119,10 @@ class _SettingsState extends State<Settings> {
                       width: 30,
                     ),
                     title: Text('Favourite'),
-                    subtitle: Text("See the saved news article"),
+                    subtitle: Text(
+                      "See the saved news article",
+                      style: Theme.of(context).textTheme.bodyText2,
+                    ),
                   ),
                 ),
                 ListTile(
@@ -128,19 +135,18 @@ class _SettingsState extends State<Settings> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       FlatButton(
-                          padding: EdgeInsets.all(0),
-                          onPressed: () async {
-                            const url = 'https://flutterblog.crumet.com';
-                            if (await canLaunch(url)) {
-                              await launch(url);
-                            } else {
-                              throw 'Could not launch $url';
-                            }
-                          },
-                          child: Text(
-                            "flutterblog.crumet.com",
-                            style: TextStyle(color: Colors.black54),
-                          )),
+                        padding: EdgeInsets.all(0),
+                        onPressed: () async {
+                          const url = 'https://flutterblog.crumet.com';
+                          if (await canLaunch(url)) {
+                            await launch(url);
+                          } else {
+                            throw 'Could not launch $url';
+                          }
+                        },
+                        child: Text("flutterblog.crumet.com",
+                            style: Theme.of(context).textTheme.bodyText2),
+                      ),
                       FlatButton(
                           padding: EdgeInsets.all(0),
                           onPressed: () async {
@@ -151,10 +157,8 @@ class _SettingsState extends State<Settings> {
                               throw 'Could not launch $url';
                             }
                           },
-                          child: Text(
-                            "info@crumet.com",
-                            style: TextStyle(color: Colors.black54),
-                          )),
+                          child: Text("info@crumet.com",
+                              style: Theme.of(context).textTheme.bodyText2)),
                     ],
                   ),
                 ),
@@ -169,7 +173,8 @@ class _SettingsState extends State<Settings> {
                       width: 30,
                     ),
                     title: Text('Share'),
-                    subtitle: Text("Spread the words of flutter blog crumet"),
+                    subtitle: Text("Spread the words of flutter blog crumet",
+                        style: Theme.of(context).textTheme.bodyText2),
                   ),
                 ),
                 ListTile(
@@ -179,12 +184,31 @@ class _SettingsState extends State<Settings> {
                   ),
                   isThreeLine: true,
                   title: Text('Notification'),
-                  subtitle: Text("Change notification preference"),
+                  subtitle: Text("Change notification preference",
+                      style: Theme.of(context).textTheme.bodyText2),
                   trailing: Switch(
                       onChanged: (val) async {
                         await saveNotificationSetting(val);
                       },
+                      activeColor: Theme.of(context).accentColor,
                       value: _notification),
+                ),
+                ListTile(
+                  leading: Image.asset(
+                    "assets/more/lamp.png",
+                    width: 30,
+                  ),
+                  isThreeLine: true,
+                  title: Text('Dark Theme'),
+                  subtitle: Text("Join the Dark Side",
+                      style: Theme.of(context).textTheme.bodyText2),
+                  trailing: Switch(
+                    onChanged: (val) async {
+                      await changeToDarkTheme(context, val);
+                    },
+                    activeColor: Theme.of(context).accentColor,
+                    value: Provider.of<AppStateNotifier>(context).isDarkMode,
+                  ),
                 ),
               ],
             )

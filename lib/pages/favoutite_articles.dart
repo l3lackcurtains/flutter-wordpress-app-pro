@@ -23,7 +23,7 @@ class _FavouriteArticlesState extends State<FavouriteArticles> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -34,16 +34,11 @@ class _FavouriteArticlesState extends State<FavouriteArticles> {
         ),
         title: Text("Favourite",
             textAlign: TextAlign.left,
-            style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                fontFamily: 'Poppins')),
+            style: Theme.of(context).textTheme.headline2),
         elevation: 5,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).backgroundColor,
       ),
       body: Container(
-        decoration: BoxDecoration(color: Colors.white),
         child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
             child: Column(children: <Widget>[categoryPosts()])),
