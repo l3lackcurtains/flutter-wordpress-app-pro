@@ -27,7 +27,7 @@ class _FavouriteArticlesState extends State<FavouriteArticles> {
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          color: Colors.black,
+          color: Theme.of(context).primaryColorDark,
           onPressed: () {
             Navigator.of(context).pop();
           },

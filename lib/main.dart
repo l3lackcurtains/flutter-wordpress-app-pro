@@ -202,33 +202,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(backgroundColor: Theme.of(context).primaryColor);
-    }
-
-    return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Theme.of(context).backgroundColor,
-          selectedLabelStyle:
-              TextStyle(fontWeight: FontWeight.w500, fontFamily: "Soleil"),
-          unselectedLabelStyle: TextStyle(fontFamily: "Soleil"),
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-                icon: Icon(Icons.home), title: Text('Home')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.flare), title: Text(PAGE2_CATEGORY_NAME)),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.search), title: Text('Search')),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.menu), title: Text('More')),
-          ],
-          currentIndex: _selectedIndex,
-          fixedColor: Theme.of(context).primaryColor,
-          onTap: _onItemTapped,
-          type: BottomNavigationBarType.fixed),
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          body: Center(
+            child: _widgetOptions.elementAt(_selectedIndex),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+              backgroundColor: Theme.of(context).backgroundColor,
+              selectedLabelStyle:
+                  TextStyle(fontWeight: FontWeight.w500, fontFamily: "Soleil"),
+              unselectedLabelStyle: TextStyle(fontFamily: "Soleil"),
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.home), title: Text('Home')),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.flare), title: Text(PAGE2_CATEGORY_NAME)),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.search), title: Text('Search')),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.menu), title: Text('More')),
+              ],
+              currentIndex: _selectedIndex,
+              fixedColor: Theme.of(context).primaryColor,
+              onTap: _onItemTapped,
+              type: BottomNavigationBarType.fixed),
+        ),
+        _isLoading
+            ? Scaffold(backgroundColor: Theme.of(context).primaryColor)
+            : Center()
+      ],
     );
   }
 
