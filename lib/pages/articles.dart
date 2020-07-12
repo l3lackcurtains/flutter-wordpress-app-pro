@@ -138,8 +138,8 @@ class _ArticlesState extends State<Articles> {
           "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=$FEATURED_ID&per_page=10&_fields=id,date,title,content,custom,link";
       Response response = await customDio.get(
         requestUrl,
-        options: buildCacheOptions(Duration(days: 3),
-            maxStale: Duration(days: 7), forceRefresh: false),
+        options:
+            buildCacheOptions(Duration(days: 3), maxStale: Duration(days: 7)),
       );
 
       if (this.mounted && response.statusCode == 200) {
@@ -293,7 +293,7 @@ class _ArticlesState extends State<Articles> {
           return Container(
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width,
-              height: 280,
+              height: 290,
               child: Loading(
                   indicator: BallBeatIndicator(),
                   size: 60.0,

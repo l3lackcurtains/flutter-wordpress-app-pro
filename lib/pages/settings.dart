@@ -34,8 +34,6 @@ class _SettingsState extends State<Settings> {
         child: Column(
           children: <Widget>[
             Container(
-              decoration:
-                  BoxDecoration(color: Theme.of(context).backgroundColor),
               alignment: Alignment.center,
               padding: EdgeInsets.fromLTRB(0, 20, 0, 10),
               child: Image(
@@ -46,8 +44,6 @@ class _SettingsState extends State<Settings> {
               ),
             ),
             Container(
-              decoration:
-                  BoxDecoration(color: Theme.of(context).backgroundColor),
               alignment: Alignment.center,
               padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
               child: Text(
