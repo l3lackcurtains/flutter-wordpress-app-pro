@@ -11,7 +11,9 @@ import 'package:flutter_wordpress_app/pages/single_article.dart';
 import 'package:http/http.dart' as http;
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'common/helpers.dart';
 import 'models/article.dart';
@@ -161,12 +163,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
     await enableNotification(context, value == 1);
 
-    onesignal.setNotificationReceivedHandler((OSNotification notification) {
-      print(notification.jsonRepresentation().replaceAll("\\n", "\n"));
-    });
-
     onesignal.setNotificationOpenedHandler(
         (OSNotificationOpenedResult result) async {
+      String url = result.notification.payload.additionalData['url'].toString();
+      if (result.action.actionId == "openbrowser") {
+        if (await canLaunch(url)) {
+          await launch(url);
+        } else {
+          throw 'Could not launch $url';
+        }
+        return;
+      } else if (result.action.actionId == "share") {
+        Share.share('$url');
+        return;
+      }
+
       String postId =
           result.notification.payload.additionalData['postId'].toString();
       await _fetchNotificationArticle(postId);
