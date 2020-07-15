@@ -28,32 +28,45 @@ class Article {
 
   factory Article.fromJson(Map<String, dynamic> json) {
     String content = json['content'] != null ? json['content']['rendered'] : "";
-
-    String image = json['custom']["featured_image"] != ""
-        ? json['custom']["featured_image"]
-        : "https://flutterblog.crumet.com/wp-content/uploads/2020/06/36852.jpg";
-
-    String video = json['custom']["td_video"];
-
-    String author = json['custom']["author"]["name"];
-
-    String avatar = json['custom']["author"]["avatar"];
-
-    String category = json["custom"]["categories"] != ""
-        ? json["custom"]["categories"][0]["name"]
-        : "";
-
-    int catId = json["custom"]["categories"] != ""
-        ? json["custom"]["categories"][0]["cat_ID"]
-        : 0;
-
     String date = DateFormat('dd MMMM, yyyy', 'en_US')
         .format(DateTime.parse(json["date"]))
         .toString();
+    String title = json['title']['rendered'];
+    String link = json["link"];
+    int id = -1;
+
+    String image = "";
+    String video = "";
+    String author = "";
+    String avatar = "";
+    String category = "";
+    int catId = -1;
+
+    if (json['custom'] != null) {
+      image = json['custom']["featured_image"] != ""
+          ? json['custom']["featured_image"]
+          : "https://flutterblog.crumet.com/wp-content/uploads/2020/06/36852.jpg";
+
+      video = json['custom']["td_video"];
+
+      author = json['custom']["author"]["name"];
+
+      avatar = json['custom']["author"]["avatar"];
+
+      category = json["custom"]["categories"] != ""
+          ? json["custom"]["categories"][0]["name"]
+          : "";
+
+      catId = json["custom"]["categories"] != ""
+          ? json["custom"]["categories"][0]["cat_ID"]
+          : 0;
+
+      id = json['id'];
+    }
 
     return Article(
-        id: json['id'],
-        title: json['title']['rendered'],
+        id: id,
+        title: title,
         content: content,
         image: image,
         video: video,
@@ -61,7 +74,7 @@ class Article {
         avatar: avatar,
         category: category,
         date: date,
-        link: json["link"],
+        link: link,
         catId: catId);
   }
 
