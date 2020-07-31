@@ -1,4 +1,4 @@
-import 'package:flutter_wordpress_app/models/article.dart';
+import 'package:flutter_wordpress_pro/models/article.dart';
 
 import 'favArticleDao.dart';
 

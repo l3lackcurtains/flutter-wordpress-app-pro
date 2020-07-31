@@ -1,4 +1,4 @@
-package com.example.flutter_wordpress_app
+package com.example.flutter_wordpress_pro
 
 import android.os.Bundle
 

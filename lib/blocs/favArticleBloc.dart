@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_wordpress_app/models/article.dart';
-import 'package:flutter_wordpress_app/repo/favArticleRepo.dart';
+import 'package:flutter_wordpress_pro/models/article.dart';
+import 'package:flutter_wordpress_pro/repo/favArticleRepo.dart';
 
 class FavArticleBloc {
   final _articleRepository = FavArticleRepository();

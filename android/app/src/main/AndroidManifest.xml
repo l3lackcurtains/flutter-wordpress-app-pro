@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutter_wordpress_app">
+    package="com.example.flutter_wordpress_pro">
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
@@ -10,7 +10,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="Flutter for Wordpress"
+        android:label="Flutter for Wordpress Pro"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"

@@ -4,11 +4,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wordpress_app/common/constants.dart';
-import 'package:flutter_wordpress_app/models/article.dart';
-import 'package:flutter_wordpress_app/pages/single_article.dart';
-import 'package:flutter_wordpress_app/widgets/articleBox.dart';
-import 'package:flutter_wordpress_app/widgets/searchBoxes.dart';
+import 'package:flutter_wordpress_pro/common/constants.dart';
+import 'package:flutter_wordpress_pro/models/article.dart';
+import 'package:flutter_wordpress_pro/pages/single_article.dart';
+import 'package:flutter_wordpress_pro/widgets/articleBox.dart';
+import 'package:flutter_wordpress_pro/widgets/searchBoxes.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading/indicator/ball_beat_indicator.dart';
 import 'package:loading/loading.dart';

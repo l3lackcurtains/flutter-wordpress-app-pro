@@ -47,7 +47,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.wordpress.flutter.app"
+        applicationId "com.wordpress.flutter.pro"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()

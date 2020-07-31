@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_wordpress_app/common/constants.dart';
-import 'package:flutter_wordpress_app/pages/articles.dart';
-import 'package:flutter_wordpress_app/pages/local_articles.dart';
-import 'package:flutter_wordpress_app/pages/search.dart';
-import 'package:flutter_wordpress_app/pages/settings.dart';
-import 'package:flutter_wordpress_app/pages/single_article.dart';
+import 'package:flutter_wordpress_pro/common/constants.dart';
+import 'package:flutter_wordpress_pro/pages/articles.dart';
+import 'package:flutter_wordpress_pro/pages/local_articles.dart';
+import 'package:flutter_wordpress_pro/pages/search.dart';
+import 'package:flutter_wordpress_pro/pages/settings.dart';
+import 'package:flutter_wordpress_pro/pages/single_article.dart';
 import 'package:http/http.dart' as http;
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:provider/provider.dart';
@@ -152,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final value = prefs.getInt(key) ?? 1;
 
     onesignal.init(
-      "45e71839-7d7b-445a-b325-b9009d92171e",
+      ONE_SIGNAL_APP_ID,
       iOSSettings: {
         OSiOSSettings.autoPrompt: true,
         OSiOSSettings.inAppLaunchUrl: true

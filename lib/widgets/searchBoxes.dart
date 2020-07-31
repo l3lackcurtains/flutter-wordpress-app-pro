@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordpress_app/common/constants.dart';
-import 'package:flutter_wordpress_app/pages/category_articles.dart';
+import 'package:flutter_wordpress_pro/common/constants.dart';
+import 'package:flutter_wordpress_pro/pages/category_articles.dart';
 
 Widget searchBoxes(BuildContext context) {
   return GridView.count(

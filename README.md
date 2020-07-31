@@ -6,7 +6,7 @@
 
 A flutter app for a wordpress based news website (https://flutterblog.crumet.com/).
 
-[![alt text](resources/google-play-badge.png "Banner")](https://play.google.com/store/apps/details?id=com.wordpress.flutter.app)
+[![alt text](resources/google-play-badge.png "Banner")](https://play.google.com/store/apps/details?id=com.wordpress.flutter.pro)
 
 # Installation
 You need to have a wordpress website before you implement the app.

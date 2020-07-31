@@ -26,3 +26,5 @@ const List<dynamic> CUSTOM_CATEGORIES = [
   ["Travel", "assets/boxed/travel.png", 7],
   ["Recipies", "assets/boxed/recipies.png", 10],
 ];
+
+const String ONE_SIGNAL_APP_ID = "45e71839-7d7b-445a-b325-b9009d92171e";

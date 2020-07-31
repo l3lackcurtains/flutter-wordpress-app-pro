@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_wordpress_app/common/helpers.dart';
+import 'package:flutter_wordpress_pro/common/helpers.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
