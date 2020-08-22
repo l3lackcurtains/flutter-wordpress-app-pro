@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:admob_flutter/admob_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
@@ -155,7 +156,23 @@ class _CategoryArticlesState extends State<CategoryArticles> {
                           ),
                         );
                       },
-                      child: articleBox(context, item, heroId),
+                      child: Column(
+                        children: <Widget>[
+                          ENABLE_ADS && index % 5 == 0
+                              ? Container(
+                                  margin: EdgeInsets.fromLTRB(10, 4, 4, 0),
+                                  child: Card(
+                                    elevation: 6,
+                                    child: AdmobBanner(
+                                      adUnitId: ADMOB_BANNER_ID_1,
+                                      adSize: AdmobBannerSize.LEADERBOARD,
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                          articleBox(context, item, heroId),
+                        ],
+                      ),
                     );
                   }),
               !_infiniteStop

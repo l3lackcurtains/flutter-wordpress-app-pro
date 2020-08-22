@@ -30,6 +30,7 @@ dependencies:
   cached_network_image: ^2.2.0+1
   provider: ^4.3.1
   onesignal_flutter: ^2.4.1
+  admob_flutter: "^0.3.4"
   
 dev_dependencies:
   flutter_test:

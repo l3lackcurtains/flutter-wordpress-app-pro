@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:admob_flutter/admob_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
@@ -242,6 +243,15 @@ class _SingleArticleState extends State<SingleArticle> {
                       ),
                     ),
                   ),
+                  ENABLE_ADS
+                      ? Container(
+                          margin: EdgeInsets.fromLTRB(0, 16, 16, 0),
+                          child: AdmobBanner(
+                            adUnitId: ADMOB_BANNER_ID_1,
+                            adSize: AdmobBannerSize.LEADERBOARD,
+                          ),
+                        )
+                      : Container(),
                   Container(
                     padding: EdgeInsets.fromLTRB(16, 36, 16, 50),
                     child: HtmlWidget(
@@ -253,7 +263,16 @@ class _SingleArticleState extends State<SingleArticle> {
                 ],
               ),
             ),
-            relatedPosts(_futureRelatedArticles)
+            ENABLE_ADS
+                ? Container(
+                    margin: EdgeInsets.fromLTRB(0, 16, 16, 0),
+                    child: AdmobBanner(
+                      adUnitId: ADMOB_BANNER_ID_1,
+                      adSize: AdmobBannerSize.LEADERBOARD,
+                    ),
+                  )
+                : Container(),
+            relatedPosts(_futureRelatedArticles),
           ],
         ),
       )),

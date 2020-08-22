@@ -28,3 +28,7 @@ const List<dynamic> CUSTOM_CATEGORIES = [
 ];
 
 const String ONE_SIGNAL_APP_ID = "45e71839-7d7b-445a-b325-b9009d92171e";
+
+const bool ENABLE_ADS = false;
+const String ADMOB_ID = "ca-app-pub-3940256099942544~3347511713";
+const String ADMOB_BANNER_ID_1 = "ca-app-pub-3940256099942544/6300978111";
