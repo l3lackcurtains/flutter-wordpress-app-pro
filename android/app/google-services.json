@@ -8,7 +8,36 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:305862062761:android:94a3bb9714777406026fb8",
+        "mobilesdk_app_id": "1:305862062761:android:4d2821e4b185a8c2026fb8",
+        "android_client_info": {
+          "package_name": "com.wordpress.flutter.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "305862062761-pu6ftpgt3be89eu1f03537acp44p0m2d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnap03TddsJIJFA6RQAiiah-FwR1z8fzE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "305862062761-pu6ftpgt3be89eu1f03537acp44p0m2d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:305862062761:android:9b3284c5f7a79f5a026fb8",
         "android_client_info": {
           "package_name": "com.wordpress.flutter.pro"
         }

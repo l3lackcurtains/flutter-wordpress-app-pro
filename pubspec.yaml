@@ -23,7 +23,8 @@ dependencies:
   path_provider: ^1.4.5
   sqflite: ^1.1.7+3
   firebase_messaging: ^5.0.1
-  firebase_database: ^3.1.5
+  firebase_core: ^0.5.0
+  firebase_database: ^4.0.0
   shared_preferences: ^0.5.6
   flutter_widget_from_html: ^0.4.1
   pull_to_refresh: ^1.5.7
@@ -31,6 +32,11 @@ dependencies:
   provider: ^4.3.1
   onesignal_flutter: ^2.4.1
   admob_flutter: "^0.3.4"
+  firebase_dynamic_links:
+    git:
+      url: https://github.com/mrmilu/flutterfire.git
+      path: packages/firebase_dynamic_links
+      ref: firebase_dynamic_links-0.5.0+4
   
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:admob_flutter/admob_flutter.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_wordpress_pro/common/constants.dart';
 import 'package:flutter_wordpress_pro/pages/articles.dart';
@@ -18,12 +20,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'common/helpers.dart';
 import 'models/article.dart';
 
-void main() => runApp(
-      ChangeNotifierProvider<AppStateNotifier>(
-        create: (context) => AppStateNotifier(),
-        child: MyApp(),
-      ),
-    );
+void main() {
+  runApp(
+    ChangeNotifierProvider<AppStateNotifier>(
+      create: (context) => AppStateNotifier(),
+      child: MyApp(),
+    ),
+  );
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -118,6 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   bool _isLoading = true;
   Article _notificationArticle;
+  Article _deepLinkArticle;
 
   final List<Widget> _widgetOptions = [
     Articles(),
@@ -131,6 +136,50 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _checkDarkTheme();
     _startOneSignal();
+    _startDynamicLinkService();
+    if (ENABLE_ADS) _startAdMob();
+  }
+
+  _startAdMob() {
+    Admob.initialize(ADMOB_ID);
+  }
+
+  _startDynamicLinkService() async {
+    final PendingDynamicLinkData data =
+        await FirebaseDynamicLinks.instance.getInitialLink();
+    _handleDeepLink(data);
+
+    FirebaseDynamicLinks.instance.onLink(
+        onSuccess: (PendingDynamicLinkData dynamicLink) async {
+      _handleDeepLink(dynamicLink);
+    }, onError: (OnLinkErrorException e) async {
+      print('Link Failed: ${e.message}');
+    });
+  }
+
+  void _handleDeepLink(PendingDynamicLinkData data) async {
+    final Uri deepLink = data?.link;
+    if (deepLink != null) {
+      print('_handleDeepLink | deeplink: $deepLink');
+
+      var isPost = deepLink.pathSegments.contains('post');
+
+      if (isPost) {
+        var postId = deepLink.queryParameters['post_id'];
+
+        if (postId != null) {
+          await _fetchDeepLinkArticle(postId);
+          if (_deepLinkArticle != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SingleArticle(_deepLinkArticle, postId),
+              ),
+            );
+          }
+        }
+      }
+    }
   }
 
   _checkDarkTheme() async {
@@ -185,7 +234,7 @@ class _MyHomePageState extends State<MyHomePage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SingleArticle(_notificationArticle, "123456"),
+            builder: (context) => SingleArticle(_notificationArticle, postId),
           ),
         );
       }
@@ -209,6 +258,25 @@ class _MyHomePageState extends State<MyHomePage> {
       throw 'No Internet connection';
     }
     return _notificationArticle;
+  }
+
+  Future<Article> _fetchDeepLinkArticle(String id) async {
+    try {
+      http.Response response =
+          await http.get("$WORDPRESS_URL/wp-json/wp/v2/posts/$id");
+      if (this.mounted) {
+        if (response.statusCode == 200) {
+          Map<String, dynamic> articleRes = json.decode(response.body);
+          setState(() {
+            _deepLinkArticle = Article.fromJson(articleRes);
+          });
+          return _deepLinkArticle;
+        }
+      }
+    } on SocketException {
+      throw 'No Internet connection';
+    }
+    return _deepLinkArticle;
   }
 
   @override
