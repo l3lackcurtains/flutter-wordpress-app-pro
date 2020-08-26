@@ -136,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     _checkDarkTheme();
     _startOneSignal();
-    _startDynamicLinkService();
+    if (ENABLE_DYNAMIC_LINK) _startDynamicLinkService();
     if (ENABLE_ADS) _startAdMob();
   }
 
