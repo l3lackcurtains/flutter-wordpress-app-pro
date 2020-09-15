@@ -39,36 +39,34 @@ class _SingleArticleState extends State<SingleArticle> {
   @override
   void initState() {
     super.initState();
-
     _futureRelatedArticles = fetchRelatedArticles();
-
     favArticle = favArticleBloc.getFavArticle(widget.article.id);
   }
 
   Future<List<dynamic>> fetchRelatedArticles() async {
-    if (this.mounted) {
-      try {
-        int postId = widget.article.id;
-        int catId = widget.article.catId;
+    if (!this.mounted) return relatedArticles;
 
-        String requestUrl =
-            "$WORDPRESS_URL/wp-json/wp/v2/posts?exclude=$postId&categories[]=$catId&per_page=3";
-        Response response = await customDio.get(
-          requestUrl,
-          options: buildCacheOptions(Duration(days: 3),
-              maxStale: Duration(days: 7), forceRefresh: false),
-        );
-        if (response.statusCode == 200) {
-          setState(() {
-            relatedArticles =
-                response.data.map((m) => Article.fromJson(m)).toList();
-          });
+    try {
+      int postId = widget.article.id;
+      int catId = widget.article.catId;
 
-          return relatedArticles;
-        }
-      } on DioError catch (e) {
-        print(e);
+      String requestUrl =
+          "$WORDPRESS_URL/wp-json/wp/v2/posts?exclude=$postId&categories[]=$catId&per_page=3";
+      Response response = await customDio.get(
+        requestUrl,
+        options: buildCacheOptions(Duration(days: 3),
+            maxStale: Duration(days: 7), forceRefresh: false),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          relatedArticles =
+              response.data.map((m) => Article.fromJson(m)).toList();
+        });
+
+        return relatedArticles;
       }
+    } on DioError catch (e) {
+      print(e);
     }
     return relatedArticles;
   }
@@ -76,7 +74,6 @@ class _SingleArticleState extends State<SingleArticle> {
   @override
   void dispose() {
     super.dispose();
-    relatedArticles = [];
   }
 
   @override

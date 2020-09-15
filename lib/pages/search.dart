@@ -22,7 +22,8 @@ class _SearchState extends State<Search> {
   String _searchText = "";
   List<dynamic> searchedArticles = [];
   Future<List<dynamic>> _futureSearchedArticles;
-  ScrollController _controller;
+  ScrollController _scrollController;
+
   final TextEditingController _textFieldController =
       new TextEditingController();
 
@@ -34,14 +35,15 @@ class _SearchState extends State<Search> {
     super.initState();
     _futureSearchedArticles =
         fetchSearchedArticles(_searchText, _searchText == "", page, false);
-    _controller =
+    _scrollController =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
-    _controller.addListener(_scrollListener);
+    _scrollController.addListener(_scrollListener);
     _infiniteStop = false;
   }
 
   Future<List<dynamic>> fetchSearchedArticles(
       String searchText, bool empty, int page, bool scrollUpdate) async {
+    if (!this.mounted) return searchedArticles;
     try {
       if (empty) {
         return searchedArticles;
@@ -50,32 +52,30 @@ class _SearchState extends State<Search> {
       var response = await http.get(
           "$WORDPRESS_URL/wp-json/wp/v2/posts?search=$searchText&page=$page&per_page=10&_fields=id,date,title,content,custom,link");
 
-      if (this.mounted) {
-        if (response.statusCode == 200) {
-          setState(() {
-            if (scrollUpdate) {
-              searchedArticles.addAll(json
-                  .decode(response.body)
-                  .map((m) => Article.fromJson(m))
-                  .toList());
-            } else {
-              searchedArticles = json
-                  .decode(response.body)
-                  .map((m) => Article.fromJson(m))
-                  .toList();
-            }
-
-            if (searchedArticles.length % 10 != 0) {
-              _infiniteStop = true;
-            }
-          });
-
-          return searchedArticles;
-        }
+      if (response.statusCode == 200) {
         setState(() {
-          _infiniteStop = true;
+          if (scrollUpdate) {
+            searchedArticles.addAll(json
+                .decode(response.body)
+                .map((m) => Article.fromJson(m))
+                .toList());
+          } else {
+            searchedArticles = json
+                .decode(response.body)
+                .map((m) => Article.fromJson(m))
+                .toList();
+          }
+
+          if (searchedArticles.length % 10 != 0) {
+            _infiniteStop = true;
+          }
         });
+
+        return searchedArticles;
       }
+      setState(() {
+        _infiniteStop = true;
+      });
     } on SocketException {
       throw 'No Internet connection';
     }
@@ -83,8 +83,10 @@ class _SearchState extends State<Search> {
   }
 
   _scrollListener() {
-    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange;
+    if (!this.mounted) return;
+    var isEnd = _scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
+        !_scrollController.position.outOfRange;
     if (isEnd) {
       setState(() {
         page += 1;
@@ -98,7 +100,7 @@ class _SearchState extends State<Search> {
   void dispose() {
     super.dispose();
     _textFieldController.dispose();
-    _controller.dispose();
+    _scrollController.dispose();
   }
 
   @override
@@ -113,7 +115,7 @@ class _SearchState extends State<Search> {
       ),
       body: Container(
         child: SingleChildScrollView(
-          controller: _controller,
+          controller: _scrollController,
           scrollDirection: Axis.vertical,
           child: Column(
             children: <Widget>[

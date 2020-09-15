@@ -42,46 +42,46 @@ class _LocalArticlesState extends State<LocalArticles> {
   }
 
   Future<List<dynamic>> fetchLocalArticles(int page) async {
-    if (this.mounted) {
-      try {
-        String requestUrl =
-            "$WORDPRESS_URL/wp-json/wp/v2/posts/?categories[]=$PAGE2_CATEGORY_ID&page=$page&per_page=10&_fields=id,date,title,content,custom,link";
-        Response response = await customDio.get(
-          requestUrl,
-          options: buildCacheOptions(Duration(days: 3),
-              maxStale: Duration(days: 7), forceRefresh: false),
-        );
-        if (response.statusCode == 200) {
-          setState(() {
-            articles
-                .addAll(response.data.map((m) => Article.fromJson(m)).toList());
-            if (articles.length % 10 != 0) {
-              _infiniteStop = true;
-            }
-          });
+    if (!this.mounted) return articles;
 
-          return articles;
-        }
-      } on DioError catch (e) {
-        if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
-            DioErrorType.CONNECT_TIMEOUT == e.type) {
-          throw ("Server is not reachable. Please verify your internet connection and try again");
-        } else if (DioErrorType.RESPONSE == e.type) {
-          if (e.response.statusCode == 400) {
-            setState(() {
-              _infiniteStop = true;
-            });
-          } else {
-            print(e.message);
-            print(e.request);
+    try {
+      String requestUrl =
+          "$WORDPRESS_URL/wp-json/wp/v2/posts/?categories[]=$PAGE2_CATEGORY_ID&page=$page&per_page=10&_fields=id,date,title,content,custom,link";
+      Response response = await customDio.get(
+        requestUrl,
+        options: buildCacheOptions(Duration(days: 3),
+            maxStale: Duration(days: 7), forceRefresh: false),
+      );
+      if (response.statusCode == 200) {
+        setState(() {
+          articles
+              .addAll(response.data.map((m) => Article.fromJson(m)).toList());
+          if (articles.length % 10 != 0) {
+            _infiniteStop = true;
           }
-        } else if (DioErrorType.DEFAULT == e.type) {
-          if (e.message.contains('SocketException')) {
-            throw ('No Internet Connection.');
-          }
+        });
+
+        return articles;
+      }
+    } on DioError catch (e) {
+      if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
+          DioErrorType.CONNECT_TIMEOUT == e.type) {
+        throw ("Server is not reachable. Please verify your internet connection and try again");
+      } else if (DioErrorType.RESPONSE == e.type) {
+        if (e.response.statusCode == 400) {
+          setState(() {
+            _infiniteStop = true;
+          });
         } else {
-          throw ("Problem connecting to the server. Please try again.");
+          print(e.message);
+          print(e.request);
         }
+      } else if (DioErrorType.DEFAULT == e.type) {
+        if (e.message.contains('SocketException')) {
+          throw ('No Internet Connection.');
+        }
+      } else {
+        throw ("Problem connecting to the server. Please try again.");
       }
     }
 
@@ -89,6 +89,7 @@ class _LocalArticlesState extends State<LocalArticles> {
   }
 
   _scrollListener() {
+    if (!this.mounted) return;
     var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
         !_controller.position.outOfRange;
     if (isEnd) {

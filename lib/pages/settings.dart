@@ -30,7 +30,8 @@ class _SettingsState extends State<Settings> {
         elevation: 5,
         backgroundColor: Theme.of(context).backgroundColor,
       ),
-      body: Container(
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Column(
           children: <Widget>[
             Container(

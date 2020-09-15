@@ -25,21 +25,20 @@ class _CategoriesState extends State<Categories> {
   }
 
   Future<List<dynamic>> fetchCategories() async {
+    if (!this.mounted) return categories;
     try {
       var response = await http
           .get("$WORDPRESS_URL/wp-json/wp/v2/categories?per_page=100");
 
-      if (this.mounted) {
-        if (response.statusCode == 200) {
-          setState(() {
-            categories = json
-                .decode(response.body)
-                .map((m) => Category.fromJson(m))
-                .toList();
-          });
+      if (response.statusCode == 200) {
+        setState(() {
+          categories = json
+              .decode(response.body)
+              .map((m) => Category.fromJson(m))
+              .toList();
+        });
 
-          return categories;
-        }
+        return categories;
       }
     } on SocketException {
       throw 'No Internet connection';

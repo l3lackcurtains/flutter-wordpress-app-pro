@@ -82,7 +82,9 @@ class _AddCommentState extends State<AddComment> {
                               return null;
                             },
                             onSaved: (String val) {
-                              _name = val;
+                              setState(() {
+                                _name = val;
+                              });
                             }),
                         TextFormField(
                             decoration: InputDecoration(
@@ -96,7 +98,9 @@ class _AddCommentState extends State<AddComment> {
                               return null;
                             },
                             onSaved: (String val) {
-                              _email = val;
+                              setState(() {
+                                _email = val;
+                              });
                             }),
                         TextFormField(
                             keyboardType: TextInputType.text,
@@ -119,7 +123,9 @@ class _AddCommentState extends State<AddComment> {
                               return null;
                             },
                             onSaved: (String val) {
-                              _comment = val;
+                              setState(() {
+                                _comment = val;
+                              });
                             }),
                         Container(
                           padding: EdgeInsets.symmetric(vertical: 36.0),

@@ -35,7 +35,8 @@ class Article {
     String link = json["link"];
     int id = -1;
 
-    String image = "";
+    String image =
+        "https://flutterblog.crumet.com/wp-content/uploads/2020/06/36852.jpg";
     String video = "";
     String author = "";
     String avatar = "";
@@ -43,9 +44,9 @@ class Article {
     int catId = -1;
 
     if (json['custom'] != null) {
-      image = json['custom']["featured_image"] != ""
-          ? json['custom']["featured_image"]
-          : "https://flutterblog.crumet.com/wp-content/uploads/2020/06/36852.jpg";
+      if (json['custom']["featured_image"] != "") {
+        image = json['custom']["featured_image"].toString();
+      }
 
       video = json['custom']["td_video"];
 
@@ -53,13 +54,13 @@ class Article {
 
       avatar = json['custom']["author"]["avatar"];
 
-      category = json["custom"]["categories"] != ""
-          ? json["custom"]["categories"][0]["name"]
-          : "";
+      if (json["custom"]["categories"] != "") {
+        category = json["custom"]["categories"][0]["name"].toString();
+      }
 
-      catId = json["custom"]["categories"] != ""
-          ? json["custom"]["categories"][0]["cat_ID"]
-          : 0;
+      if (json["custom"]["categories"] != "") {
+        catId = json["custom"]["categories"][0]["cat_ID"];
+      }
 
       id = json['id'];
     }

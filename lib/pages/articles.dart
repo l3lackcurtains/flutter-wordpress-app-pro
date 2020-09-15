@@ -44,6 +44,7 @@ class _ArticlesState extends State<Articles> {
   }
 
   void _checkforForceUpdate(int lastId) async {
+    if (!this.mounted) return;
     try {
       String requestUrl =
           "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=1&_fields=id";
@@ -67,6 +68,8 @@ class _ArticlesState extends State<Articles> {
   }
 
   _scrollListener() {
+    if (!this.mounted) return;
+
     var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
         !_controller.position.outOfRange;
     if (isEnd) {
@@ -84,56 +87,58 @@ class _ArticlesState extends State<Articles> {
   }
 
   Future<List<dynamic>> fetchLatestArticles(int page) async {
-    if (this.mounted) {
-      try {
-        String requestUrl =
-            "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=10&_fields=id,date,title,content,custom,link";
-        Response response = await customDio.get(
-          requestUrl,
-          options:
-              buildCacheOptions(Duration(days: 3), maxStale: Duration(days: 7)),
-        );
+    if (!this.mounted) return latestArticles;
 
-        if (response.statusCode == 200) {
+    try {
+      String requestUrl =
+          "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=10&_fields=id,date,title,content,custom,link";
+      Response response = await customDio.get(
+        requestUrl,
+        options:
+            buildCacheOptions(Duration(days: 3), maxStale: Duration(days: 7)),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          latestArticles
+              .addAll(response.data.map((m) => Article.fromJson(m)).toList());
+          if (latestArticles.length % 10 != 0) {
+            _infiniteStop = true;
+          }
+        });
+        if (page == 1) {
+          _checkforForceUpdate(latestArticles[0].id);
+        }
+
+        return latestArticles;
+      }
+    } on DioError catch (e) {
+      if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
+          DioErrorType.CONNECT_TIMEOUT == e.type) {
+        throw ("Server is not reachable. Please verify your internet connection and try again");
+      } else if (DioErrorType.RESPONSE == e.type) {
+        if (e.response.statusCode == 400) {
           setState(() {
-            latestArticles
-                .addAll(response.data.map((m) => Article.fromJson(m)).toList());
-            if (latestArticles.length % 10 != 0) {
-              _infiniteStop = true;
-            }
+            _infiniteStop = true;
           });
-          if (page == 1) {
-            _checkforForceUpdate(latestArticles[0].id);
-          }
-
-          return latestArticles;
-        }
-      } on DioError catch (e) {
-        if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
-            DioErrorType.CONNECT_TIMEOUT == e.type) {
-          throw ("Server is not reachable. Please verify your internet connection and try again");
-        } else if (DioErrorType.RESPONSE == e.type) {
-          if (e.response.statusCode == 400) {
-            setState(() {
-              _infiniteStop = true;
-            });
-          } else {
-            print(e.message);
-            print(e.request);
-          }
-        } else if (DioErrorType.DEFAULT == e.type) {
-          if (e.message.contains('SocketException')) {
-            throw ('No Internet Connection.');
-          }
         } else {
-          throw ("Problem connecting to the server. Please try again.");
+          print(e.message);
+          print(e.request);
         }
+      } else if (DioErrorType.DEFAULT == e.type) {
+        if (e.message.contains('SocketException')) {
+          throw ('No Internet Connection.');
+        }
+      } else {
+        throw ("Problem connecting to the server. Please try again.");
       }
     }
+
     return latestArticles;
   }
 
   Future<List<dynamic>> fetchFeaturedArticles() async {
+    if (!this.mounted) return featuredArticles;
     try {
       String requestUrl =
           "$WORDPRESS_URL/wp-json/wp/v2/posts?categories[]=$FEATURED_ID&per_page=10&_fields=id,date,title,content,custom,link";
