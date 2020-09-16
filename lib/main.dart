@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppStateNotifier>(builder: (context, appState, child) {
       return MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Icilome',
         theme: ThemeData(
             brightness: Brightness.light,
@@ -303,7 +304,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     icon: Icon(Icons.menu), title: Text('More')),
               ],
               currentIndex: _selectedIndex,
-              fixedColor: Theme.of(context).primaryColor,
               onTap: _onItemTapped,
               type: BottomNavigationBarType.fixed),
         ),
