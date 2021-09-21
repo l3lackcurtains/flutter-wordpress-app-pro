@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,6 @@ import 'package:flutter_wordpress_pro/pages/single_Article.dart';
 import 'package:flutter_wordpress_pro/widgets/articleBox.dart';
 import 'package:flutter_wordpress_pro/widgets/articleBoxFeatured.dart';
 import 'package:http/http.dart' as http;
-import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/loading.dart';
 
 class Articles extends StatefulWidget {
   @override
@@ -25,11 +22,11 @@ class Articles extends StatefulWidget {
 class _ArticlesState extends State<Articles> {
   List<dynamic> featuredArticles = [];
   List<dynamic> latestArticles = [];
-  Future<List<dynamic>> _futureLastestArticles;
-  Future<List<dynamic>> _futureFeaturedArticles;
-  ScrollController _controller;
+  Future<List<dynamic>>? _futureLastestArticles;
+  Future<List<dynamic>>? _futureFeaturedArticles;
+  ScrollController? _controller;
   int page = 1;
-  bool _infiniteStop;
+  bool? _infiniteStop;
 
   @override
   void initState() {
@@ -39,7 +36,7 @@ class _ArticlesState extends State<Articles> {
     _futureFeaturedArticles = fetchFeaturedArticles();
     _controller =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
     _infiniteStop = false;
   }
 
@@ -49,7 +46,7 @@ class _ArticlesState extends State<Articles> {
       String requestUrl =
           "$WORDPRESS_URL/wp-json/wp/v2/posts?page=$page&per_page=1&_fields=id";
       var response = await http.get(
-        requestUrl,
+        Uri.parse(requestUrl),
       );
 
       if (response.statusCode == 200) {
@@ -70,8 +67,8 @@ class _ArticlesState extends State<Articles> {
   _scrollListener() {
     if (!this.mounted) return;
 
-    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange;
+    var isEnd = _controller!.offset >= _controller!.position.maxScrollExtent &&
+        !_controller!.position.outOfRange;
     if (isEnd) {
       setState(() {
         page += 1;
@@ -83,7 +80,7 @@ class _ArticlesState extends State<Articles> {
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _controller!.dispose();
   }
 
   Future<List<dynamic>> fetchLatestArticles(int page) async {
@@ -113,19 +110,18 @@ class _ArticlesState extends State<Articles> {
         return latestArticles;
       }
     } on DioError catch (e) {
-      if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
-          DioErrorType.CONNECT_TIMEOUT == e.type) {
+      if (DioErrorType.receiveTimeout == e.type ||
+          DioErrorType.connectTimeout == e.type) {
         throw ("Server is not reachable. Please verify your internet connection and try again");
-      } else if (DioErrorType.RESPONSE == e.type) {
-        if (e.response.statusCode == 400) {
+      } else if (DioErrorType.response == e.type) {
+        if (e.response!.statusCode == 400) {
           setState(() {
             _infiniteStop = true;
           });
         } else {
           print(e.message);
-          print(e.request);
         }
-      } else if (DioErrorType.DEFAULT == e.type) {
+      } else if (DioErrorType.other == e.type) {
         if (e.message.contains('SocketException')) {
           throw ('No Internet Connection.');
         }
@@ -157,7 +153,6 @@ class _ArticlesState extends State<Articles> {
       }
     } on DioError catch (e) {
       print(e.message);
-      print(e.request);
     }
     return featuredArticles;
   }
@@ -181,8 +176,8 @@ class _ArticlesState extends State<Articles> {
             scrollDirection: Axis.vertical,
             child: Column(
               children: <Widget>[
-                featuredPost(_futureFeaturedArticles),
-                latestPosts(_futureLastestArticles)
+                featuredPost(_futureFeaturedArticles as Future<List<dynamic>>),
+                latestPosts(_futureLastestArticles as Future<List<dynamic>>)
               ],
             ),
           ),
@@ -194,15 +189,15 @@ class _ArticlesState extends State<Articles> {
       future: latestArticles,
       builder: (context, articleSnapshot) {
         if (articleSnapshot.hasData) {
-          if (articleSnapshot.data.length == 0) return Container();
+          if (articleSnapshot.data!.length == 0) return Container();
           return Column(
             children: <Widget>[
               ListView.builder(
-                  itemCount: articleSnapshot.data.length,
+                  itemCount: articleSnapshot.data!.length,
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    Article item = articleSnapshot.data[index];
+                    Article item = articleSnapshot.data![index];
                     Random random = new Random();
                     final randNum = random.nextInt(10000);
                     final heroId = item.id.toString() + randNum.toString();
@@ -217,31 +212,14 @@ class _ArticlesState extends State<Articles> {
                       },
                       child: Column(
                         children: <Widget>[
-                          ENABLE_ADS && index % 5 == 0
-                              ? Container(
-                                  margin: EdgeInsets.fromLTRB(10, 4, 4, 0),
-                                  child: Card(
-                                    elevation: 6,
-                                    child: AdmobBanner(
-                                      adUnitId: ADMOB_BANNER_ID_1,
-                                      adSize: AdmobBannerSize.LEADERBOARD,
-                                    ),
-                                  ),
-                                )
-                              : Container(),
                           articleBox(context, item, heroId),
                         ],
                       ),
                     );
                   }),
-              !_infiniteStop
+              _infiniteStop == false
                   ? Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      child: Loading(
-                          indicator: BallBeatIndicator(),
-                          size: 60.0,
-                          color: Theme.of(context).accentColor))
+                      )
                   : Container()
             ],
           );
@@ -252,13 +230,7 @@ class _ArticlesState extends State<Articles> {
               child: Text("${articleSnapshot.error}"));
         }
         return Container(
-            alignment: Alignment.center,
-            width: MediaQuery.of(context).size.width,
-            height: 150,
-            child: Loading(
-                indicator: BallBeatIndicator(),
-                size: 60.0,
-                color: Theme.of(context).accentColor));
+            );
       },
     );
   }
@@ -270,9 +242,9 @@ class _ArticlesState extends State<Articles> {
         future: featuredArticles,
         builder: (context, articleSnapshot) {
           if (articleSnapshot.hasData) {
-            if (articleSnapshot.data.length == 0) return Container();
+            if (articleSnapshot.data!.length == 0) return Container();
             return Row(
-                children: articleSnapshot.data.map((item) {
+                children: articleSnapshot.data!.map((item) {
               Random random = new Random();
               final randNum = random.nextInt(10000);
               final heroId = item.id.toString() + randNum.toString();
@@ -300,7 +272,7 @@ class _ArticlesState extends State<Articles> {
                     width: 250,
                   ),
                   Text("No Internet Connection."),
-                  FlatButton.icon(
+                  TextButton.icon(
                     icon: Icon(Icons.refresh),
                     label: Text("Reload"),
                     onPressed: () {
@@ -313,13 +285,7 @@ class _ArticlesState extends State<Articles> {
             );
           }
           return Container(
-              alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width,
-              height: 290,
-              child: Loading(
-                  indicator: BallBeatIndicator(),
-                  size: 60.0,
-                  color: Theme.of(context).accentColor));
+              );
         },
       ),
     );

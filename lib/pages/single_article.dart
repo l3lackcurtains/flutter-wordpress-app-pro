@@ -1,28 +1,23 @@
 import 'dart:async';
 
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:flutter_wordpress_pro/blocs/favArticleBloc.dart';
 import 'package:flutter_wordpress_pro/common/constants.dart';
 import 'package:flutter_wordpress_pro/common/helpers.dart';
 import 'package:flutter_wordpress_pro/models/article.dart';
 import 'package:flutter_wordpress_pro/pages/comments.dart';
 import 'package:flutter_wordpress_pro/widgets/articleBox.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/loading.dart';
 import 'package:share/share.dart';
 
 class SingleArticle extends StatefulWidget {
-  final dynamic article;
+  final Article article;
   final String heroId;
 
-  SingleArticle(this.article, this.heroId, {Key key}) : super(key: key);
+  const SingleArticle(this.article, this.heroId, {Key? key}) : super(key: key);
 
   @override
   _SingleArticleState createState() => _SingleArticleState();
@@ -30,28 +25,24 @@ class SingleArticle extends StatefulWidget {
 
 class _SingleArticleState extends State<SingleArticle> {
   List<dynamic> relatedArticles = [];
-  Future<List<dynamic>> _futureRelatedArticles;
-
-  final FavArticleBloc favArticleBloc = FavArticleBloc();
-
-  Future<dynamic> favArticle;
+  Future<List<dynamic>>? _futureRelatedArticles;
 
   @override
   void initState() {
     super.initState();
     _futureRelatedArticles = fetchRelatedArticles();
-    favArticle = favArticleBloc.getFavArticle(widget.article.id);
   }
 
   Future<List<dynamic>> fetchRelatedArticles() async {
     if (!this.mounted) return relatedArticles;
 
     try {
-      int postId = widget.article.id;
-      int catId = widget.article.catId;
+      String postId = widget.article.id.toString();
+      String catId = widget.article.catId.toString();
 
       String requestUrl =
           "$WORDPRESS_URL/wp-json/wp/v2/posts?exclude=$postId&categories[]=$catId&per_page=3";
+
       Response response = await customDio.get(
         requestUrl,
         options: buildCacheOptions(Duration(days: 3),
@@ -78,12 +69,12 @@ class _SingleArticleState extends State<SingleArticle> {
 
   @override
   Widget build(BuildContext context) {
-    final article = widget.article;
+    final Article article = widget.article;
     final heroId = widget.heroId;
     final articleVideo = widget.article.video;
     String youtubeUrl = "";
     String dailymotionUrl = "";
-    if (articleVideo.contains("youtube")) {
+    if (articleVideo!.contains("youtube")) {
       youtubeUrl = articleVideo.split('?v=')[1];
     }
     if (articleVideo.contains("dailymotion")) {
@@ -162,7 +153,7 @@ class _SingleArticleState extends State<SingleArticle> {
                                         ),
                                       )
                             : CachedNetworkImage(
-                                imageUrl: article.image,
+                                imageUrl: article.image.toString(),
                                 placeholder: (context, url) => Container(
                                     alignment: Alignment.center,
                                     height: 20,
@@ -197,19 +188,17 @@ class _SingleArticleState extends State<SingleArticle> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Html(
-                      data: "<h1>" + article.title + "</h1>",
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
-                      customTextStyle: (dom.Node node, TextStyle baseStyle) {
-                        if (node is dom.Element) {
-                          switch (node.localName) {
-                            case "h1":
-                              return Theme.of(context)
-                                  .textTheme
-                                  .headline1
-                                  .merge(TextStyle(fontSize: 20));
-                          }
-                        }
-                        return baseStyle;
+                      data: article.title!.length > 70
+                          ? "<h2>" +
+                              article.title.toString().substring(0, 70) +
+                              "...</h2>"
+                          : "<h2>" + article.title.toString() + "</h2>",
+                      style: {
+                        "h2": Style(
+                            color: Theme.of(context).primaryColorDark,
+                            fontWeight: FontWeight.w500,
+                            fontSize: FontSize.em(1.8),
+                            padding: EdgeInsets.all(4)),
                       }),
                   Container(
                     decoration: BoxDecoration(
@@ -218,7 +207,7 @@ class _SingleArticleState extends State<SingleArticle> {
                     padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                     margin: EdgeInsets.all(16),
                     child: Text(
-                      article.category,
+                      article.category.toString(),
                       style: TextStyle(
                           color: Theme.of(context).primaryColorDark,
                           fontSize: 11),
@@ -228,48 +217,31 @@ class _SingleArticleState extends State<SingleArticle> {
                     height: 45,
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(article.avatar),
+                        backgroundImage: NetworkImage(article.avatar.toString()),
                       ),
                       title: Text(
-                        "By " + article.author,
+                        "By " + article.author.toString(),
                         style: TextStyle(fontSize: 12),
                       ),
                       subtitle: Text(
-                        article.date,
+                        article.date.toString(),
                         style: TextStyle(fontSize: 11),
                       ),
                     ),
                   ),
-                  ENABLE_ADS
-                      ? Container(
-                          margin: EdgeInsets.fromLTRB(0, 16, 16, 0),
-                          child: AdmobBanner(
-                            adUnitId: ADMOB_BANNER_ID_1,
-                            adSize: AdmobBannerSize.LEADERBOARD,
-                          ),
-                        )
-                      : Container(),
                   Container(
                     padding: EdgeInsets.fromLTRB(16, 36, 16, 50),
                     child: HtmlWidget(
-                      article.content,
+                      article.content.toString(),
                       webView: true,
-                      textStyle: Theme.of(context).textTheme.bodyText1,
+                      textStyle:
+                          Theme.of(context).textTheme.bodyText1 as TextStyle,
                     ),
                   ),
                 ],
               ),
             ),
-            ENABLE_ADS
-                ? Container(
-                    margin: EdgeInsets.fromLTRB(0, 16, 16, 0),
-                    child: AdmobBanner(
-                      adUnitId: ADMOB_BANNER_ID_1,
-                      adSize: AdmobBannerSize.LEADERBOARD,
-                    ),
-                  )
-                : Container(),
-            relatedPosts(_futureRelatedArticles),
+            relatedPosts(_futureRelatedArticles as Future<List<dynamic>>),
           ],
         ),
       )),
@@ -281,49 +253,6 @@ class _SingleArticleState extends State<SingleArticle> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
-              FutureBuilder<dynamic>(
-                  future: favArticle,
-                  builder:
-                      (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                    if (snapshot.hasData) {
-                      return Container(
-                        child: IconButton(
-                          padding: EdgeInsets.all(0),
-                          icon: Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                            size: 24.0,
-                          ),
-                          onPressed: () {
-                            // Favourite post
-                            favArticleBloc.deleteFavArticleById(article.id);
-                            setState(() {
-                              favArticle =
-                                  favArticleBloc.getFavArticle(article.id);
-                            });
-                          },
-                        ),
-                      );
-                    }
-                    return Container(
-                      decoration: BoxDecoration(),
-                      child: IconButton(
-                        padding: EdgeInsets.all(0),
-                        icon: Icon(
-                          Icons.favorite_border,
-                          color: Colors.red,
-                          size: 24.0,
-                        ),
-                        onPressed: () {
-                          favArticleBloc.addFavArticle(article);
-                          setState(() {
-                            favArticle =
-                                favArticleBloc.getFavArticle(article.id);
-                          });
-                        },
-                      ),
-                    );
-                  }),
               Container(
                 child: IconButton(
                   padding: EdgeInsets.all(0),
@@ -336,7 +265,7 @@ class _SingleArticleState extends State<SingleArticle> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Comments(article.id),
+                          builder: (context) => Comments(article.id ?? -1),
                           fullscreenDialog: true,
                         ));
                   },
@@ -351,7 +280,7 @@ class _SingleArticleState extends State<SingleArticle> {
                     size: 24.0,
                   ),
                   onPressed: () {
-                    Share.share('Share the news: ' + article.link);
+                    Share.share('Share the news: ' + article.link.toString());
                   },
                 ),
               ),
@@ -367,7 +296,7 @@ class _SingleArticleState extends State<SingleArticle> {
       future: latestArticles,
       builder: (context, articleSnapshot) {
         if (articleSnapshot.hasData) {
-          if (articleSnapshot.data.length == 0) return Container();
+          if (articleSnapshot.data!.length == 0) return Container();
           return Column(
             children: <Widget>[
               Container(
@@ -383,7 +312,7 @@ class _SingleArticleState extends State<SingleArticle> {
                 ),
               ),
               Column(
-                children: articleSnapshot.data.map((item) {
+                children: articleSnapshot.data!.map((item) {
                   final heroId = item.id.toString() + "-related";
                   return InkWell(
                     onTap: () {
@@ -409,14 +338,7 @@ class _SingleArticleState extends State<SingleArticle> {
               alignment: Alignment.center,
               child: Text("${articleSnapshot.error}"));
         }
-        return Container(
-            alignment: Alignment.center,
-            width: MediaQuery.of(context).size.width,
-            height: 150,
-            child: Loading(
-                indicator: BallBeatIndicator(),
-                size: 60.0,
-                color: Theme.of(context).accentColor));
+        return Container();
       },
     );
   }

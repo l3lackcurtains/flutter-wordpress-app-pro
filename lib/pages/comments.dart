@@ -7,15 +7,14 @@ import 'package:flutter_wordpress_pro/common/constants.dart';
 import 'package:flutter_wordpress_pro/models/Comment.dart';
 import 'package:flutter_wordpress_pro/widgets/commentBox.dart';
 import 'package:http/http.dart' as http;
-import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/loading.dart';
+
 
 import 'add_comment.dart';
 
 Future<List<dynamic>> fetchComments(int id) async {
   try {
     var response = await http
-        .get("$WORDPRESS_URL/wp-json/wp/v2/comments?post=" + id.toString());
+        .get(Uri.parse("$WORDPRESS_URL/wp-json/wp/v2/comments?post=" + id.toString()));
 
     if (response.statusCode == 200) {
       return json
@@ -33,7 +32,7 @@ Future<List<dynamic>> fetchComments(int id) async {
 class Comments extends StatefulWidget {
   final int commentId;
 
-  Comments(this.commentId, {Key key}) : super(key: key);
+  Comments(this.commentId, {Key? key}) : super(key: key);
   @override
   _CommentsState createState() => _CommentsState();
 }
@@ -84,7 +83,7 @@ Widget commentSection(Future<List<dynamic>> comments) {
     future: comments,
     builder: (context, commentSnapshot) {
       if (commentSnapshot.hasData) {
-        if (commentSnapshot.data.length == 0)
+        if (commentSnapshot.data!.length == 0)
           return Container(
             height: 500,
             alignment: Alignment.center,
@@ -94,7 +93,7 @@ Widget commentSection(Future<List<dynamic>> comments) {
             ),
           );
         return Column(
-            children: commentSnapshot.data.map((item) {
+            children: commentSnapshot.data!.map((item) {
           return InkWell(
             onTap: () {},
             child: commentBox(context, item.author, item.avatar, item.content),
@@ -107,12 +106,7 @@ Widget commentSection(Future<List<dynamic>> comments) {
             child: Text("${commentSnapshot.error}"));
       }
       return Container(
-        alignment: Alignment.center,
-        height: 400,
-        child: Loading(
-            indicator: BallBeatIndicator(),
-            size: 60.0,
-            color: Theme.of(context).accentColor),
+        
       );
     },
   );

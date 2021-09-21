@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_wordpress_pro/models/article.dart';
-import 'package:html/dom.dart' as dom;
 
 Widget articleBoxFeatured(
     BuildContext context, Article article, String heroId) {
@@ -22,7 +21,7 @@ Widget articleBoxFeatured(
                 child: ClipRRect(
                   borderRadius: new BorderRadius.circular(8.0),
                   child: CachedNetworkImage(
-                    imageUrl: article.image,
+                    imageUrl: article.image.toString(),
                     placeholder: (context, url) => Container(
                         alignment: Alignment.center,
                         height: 20,
@@ -61,22 +60,16 @@ Widget articleBoxFeatured(
                     children: <Widget>[
                       Container(
                         child: Html(
-                            data: article.title.length > 70
-                                ? "<h1>" +
-                                    article.title.substring(0, 70) +
-                                    "...</h1>"
-                                : "<h1>" + article.title + "</h1>",
-                            customTextStyle:
-                                (dom.Node node, TextStyle baseStyle) {
-                              if (node is dom.Element) {
-                                switch (node.localName) {
-                                  case "h1":
-                                    return baseStyle.merge(
-                                        Theme.of(context).textTheme.headline1);
+                              data: article.title!.length > 70
+                                  ? "<h4>" +
+                                      article.title.toString().substring(0, 70) +
+                                      "...</h4>"
+                                  : "<h4>" + article.title.toString() + "</h4>",
+
+                                  style: {
+                                  "h4": Style(color: Theme.of(context).primaryColorDark, fontWeight: FontWeight.w500, fontSize: FontSize.em(1.02)),
                                 }
-                              }
-                              return baseStyle;
-                            }),
+                              ),
                       ),
                       Container(
                         alignment: Alignment.topLeft,
@@ -91,7 +84,7 @@ Widget articleBoxFeatured(
                               padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                               margin: EdgeInsets.fromLTRB(0, 0, 0, 8),
                               child: Text(
-                                article.category,
+                                article.category.toString(),
                                 style: TextStyle(
                                     color: Theme.of(context).primaryColorDark,
                                     fontSize: 11,
@@ -111,7 +104,7 @@ Widget articleBoxFeatured(
                                     width: 4,
                                   ),
                                   Text(
-                                    article.date,
+                                    article.date.toString(),
                                     style: Theme.of(context).textTheme.caption,
                                   ),
                                 ],
@@ -132,7 +125,6 @@ Widget articleBoxFeatured(
                 left: 18,
                 top: 18,
                 child: Card(
-                  color: Theme.of(context).accentColor,
                   child: CircleAvatar(
                     radius: 14,
                     backgroundColor: Colors.transparent,

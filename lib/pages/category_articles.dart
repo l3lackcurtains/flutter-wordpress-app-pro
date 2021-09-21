@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
@@ -9,23 +8,20 @@ import 'package:flutter_wordpress_pro/common/helpers.dart';
 import 'package:flutter_wordpress_pro/models/article.dart';
 import 'package:flutter_wordpress_pro/pages/single_Article.dart';
 import 'package:flutter_wordpress_pro/widgets/articleBox.dart';
-import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/loading.dart';
-
 class CategoryArticles extends StatefulWidget {
   final int id;
   final String name;
-  CategoryArticles(this.id, this.name, {Key key}) : super(key: key);
+  CategoryArticles(this.id, this.name, {Key? key}) : super(key: key);
   @override
   _CategoryArticlesState createState() => _CategoryArticlesState();
 }
 
 class _CategoryArticlesState extends State<CategoryArticles> {
   List<dynamic> categoryArticles = [];
-  Future<List<dynamic>> _futureCategoryArticles;
-  ScrollController _controller;
+  Future<List<dynamic>>? _futureCategoryArticles;
+  ScrollController? _controller;
   int page = 1;
-  bool _infiniteStop;
+  bool _infiniteStop = false;
 
   @override
   void initState() {
@@ -33,14 +29,14 @@ class _CategoryArticlesState extends State<CategoryArticles> {
     _futureCategoryArticles = fetchCategoryArticles(1);
     _controller =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
     _infiniteStop = false;
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _controller!.dispose();
   }
 
   Future<List<dynamic>> fetchCategoryArticles(int page) async {
@@ -68,19 +64,18 @@ class _CategoryArticlesState extends State<CategoryArticles> {
         return categoryArticles;
       }
     } on DioError catch (e) {
-      if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
-          DioErrorType.CONNECT_TIMEOUT == e.type) {
+      if (DioErrorType.receiveTimeout == e.type ||
+          DioErrorType.connectTimeout == e.type) {
         throw ("Server is not reachable. Please verify your internet connection and try again");
-      } else if (DioErrorType.RESPONSE == e.type) {
-        if (e.response.statusCode == 400) {
+      } else if (DioErrorType.response == e.type) {
+        if (e.response!.statusCode == 400) {
           setState(() {
             _infiniteStop = true;
           });
         } else {
           print(e.message);
-          print(e.request);
         }
-      } else if (DioErrorType.DEFAULT == e.type) {
+      } else if (DioErrorType.other == e.type) {
         if (e.message.contains('SocketException')) {
           throw ('No Internet Connection.');
         }
@@ -94,8 +89,8 @@ class _CategoryArticlesState extends State<CategoryArticles> {
 
   _scrollListener() {
     if (!this.mounted) return;
-    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange;
+    var isEnd = _controller!.offset >= _controller!.position.maxScrollExtent &&
+        !_controller!.position.outOfRange;
     if (isEnd) {
       setState(() {
         page += 1;
@@ -127,7 +122,7 @@ class _CategoryArticlesState extends State<CategoryArticles> {
             controller: _controller,
             scrollDirection: Axis.vertical,
             child: Column(
-                children: <Widget>[categoryPosts(_futureCategoryArticles)])),
+                children: <Widget>[categoryPosts(_futureCategoryArticles as Future<List<dynamic>>)])),
       ),
     );
   }
@@ -137,15 +132,15 @@ class _CategoryArticlesState extends State<CategoryArticles> {
       future: categoryArticles,
       builder: (context, articleSnapshot) {
         if (articleSnapshot.hasData) {
-          if (articleSnapshot.data.length == 0) return Container();
+          if (articleSnapshot.data!.length == 0) return Container();
           return Column(
             children: <Widget>[
               ListView.builder(
-                  itemCount: articleSnapshot.data.length,
+                  itemCount: articleSnapshot.data!.length,
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    Article item = articleSnapshot.data[index];
+                    Article item = articleSnapshot.data![index];
                     Random random = new Random();
                     final randNum = random.nextInt(10000);
                     final heroId = item.id.toString() + randNum.toString();
@@ -160,18 +155,6 @@ class _CategoryArticlesState extends State<CategoryArticles> {
                       },
                       child: Column(
                         children: <Widget>[
-                          ENABLE_ADS && index % 5 == 0
-                              ? Container(
-                                  margin: EdgeInsets.fromLTRB(10, 4, 4, 0),
-                                  child: Card(
-                                    elevation: 6,
-                                    child: AdmobBanner(
-                                      adUnitId: ADMOB_BANNER_ID_1,
-                                      adSize: AdmobBannerSize.LEADERBOARD,
-                                    ),
-                                  ),
-                                )
-                              : Container(),
                           articleBox(context, item, heroId),
                         ],
                       ),
@@ -179,12 +162,7 @@ class _CategoryArticlesState extends State<CategoryArticles> {
                   }),
               !_infiniteStop
                   ? Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      child: Loading(
-                          indicator: BallBeatIndicator(),
-                          size: 60.0,
-                          color: Theme.of(context).accentColor))
+                      )
                   : Container()
             ],
           );
@@ -197,10 +175,7 @@ class _CategoryArticlesState extends State<CategoryArticles> {
         return Container(
           alignment: Alignment.center,
           height: 400,
-          child: Loading(
-              indicator: BallBeatIndicator(),
-              size: 60.0,
-              color: Theme.of(context).accentColor),
+          
         );
       },
     );

@@ -11,12 +11,12 @@ class FavArticleDatabaseProvider {
   static final FavArticleDatabaseProvider dbProvider =
       FavArticleDatabaseProvider();
 
-  Database _database;
+  Database? _database;
 
   Future<Database> get database async {
-    if (_database != null) return _database;
+    if (_database != null) return _database as Database;
     _database = await createDatabase();
-    return _database;
+    return _database as Database;
   }
 
   createDatabase() async {

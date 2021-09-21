@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'favoutite_articles.dart';
-
 class Settings extends StatefulWidget {
   @override
   _SettingsState createState() => _SettingsState();
@@ -61,27 +59,6 @@ class _SettingsState extends State<Settings> {
             ListView(
               shrinkWrap: true,
               children: <Widget>[
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FavouriteArticles(),
-                      ),
-                    );
-                  },
-                  child: ListTile(
-                    leading: Image.asset(
-                      "assets/more/favourite.png",
-                      width: 30,
-                    ),
-                    title: Text('Favourite'),
-                    subtitle: Text(
-                      "See the saved news article",
-                      style: Theme.of(context).textTheme.bodyText2,
-                    ),
-                  ),
-                ),
                 ListTile(
                   leading: Image.asset(
                     "assets/more/contact.png",
@@ -91,8 +68,7 @@ class _SettingsState extends State<Settings> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      FlatButton(
-                        padding: EdgeInsets.all(0),
+                      TextButton(
                         onPressed: () async {
                           const url = 'https://flutterblog.crumet.com';
                           if (await canLaunch(url)) {
@@ -104,8 +80,7 @@ class _SettingsState extends State<Settings> {
                         child: Text("flutterblog.crumet.com",
                             style: Theme.of(context).textTheme.bodyText2),
                       ),
-                      FlatButton(
-                          padding: EdgeInsets.all(0),
+                      TextButton(
                           onPressed: () async {
                             const url = 'mailto:info@crumet.com';
                             if (await canLaunch(url)) {
@@ -134,23 +109,7 @@ class _SettingsState extends State<Settings> {
                         style: Theme.of(context).textTheme.bodyText2),
                   ),
                 ),
-                ListTile(
-                  leading: Image.asset(
-                    "assets/more/notification.png",
-                    width: 30,
-                  ),
-                  isThreeLine: true,
-                  title: Text('Notification'),
-                  subtitle: Text("Change notification preference",
-                      style: Theme.of(context).textTheme.bodyText2),
-                  trailing: Switch(
-                      onChanged: (val) async {
-                        await enableNotification(context, val);
-                      },
-                      activeColor: Theme.of(context).accentColor,
-                      value: Provider.of<AppStateNotifier>(context)
-                          .notificationOn),
-                ),
+
                 ListTile(
                   leading: Image.asset(
                     "assets/more/lamp.png",
@@ -164,7 +123,6 @@ class _SettingsState extends State<Settings> {
                     onChanged: (val) async {
                       await changeToDarkTheme(context, val);
                     },
-                    activeColor: Theme.of(context).accentColor,
                     value: Provider.of<AppStateNotifier>(context).isDarkMode,
                   ),
                 ),

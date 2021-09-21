@@ -5,7 +5,7 @@ import 'favArticleDao.dart';
 class FavArticleRepository {
   final favArticleDao = FavArticleDao();
 
-  Future getAllFavArticles({String query, int page}) =>
+  Future getAllFavArticles({String? query, int? page}) =>
       favArticleDao.getFavArticles(query: query, page: page);
 
   Future getFavArticle(int id) => favArticleDao.getFavArticle(id);

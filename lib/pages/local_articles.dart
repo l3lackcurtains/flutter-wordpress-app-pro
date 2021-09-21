@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:admob_flutter/admob_flutter.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
@@ -9,9 +8,6 @@ import 'package:flutter_wordpress_pro/common/helpers.dart';
 import 'package:flutter_wordpress_pro/models/article.dart';
 import 'package:flutter_wordpress_pro/pages/single_Article.dart';
 import 'package:flutter_wordpress_pro/widgets/articleBox.dart';
-import 'package:loading/indicator/ball_beat_indicator.dart';
-import 'package:loading/loading.dart';
-
 class LocalArticles extends StatefulWidget {
   @override
   _LocalArticlesState createState() => _LocalArticlesState();
@@ -19,11 +15,11 @@ class LocalArticles extends StatefulWidget {
 
 class _LocalArticlesState extends State<LocalArticles> {
   List<dynamic> articles = [];
-  Future<List<dynamic>> _futureArticles;
+  Future<List<dynamic>>? _futureArticles;
 
-  ScrollController _controller;
+  ScrollController? _controller;
   int page = 1;
-  bool _infiniteStop;
+  bool _infiniteStop = false;
 
   @override
   void initState() {
@@ -31,14 +27,14 @@ class _LocalArticlesState extends State<LocalArticles> {
     _futureArticles = fetchLocalArticles(1);
     _controller =
         ScrollController(initialScrollOffset: 0.0, keepScrollOffset: true);
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
     _infiniteStop = false;
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _controller!.dispose();
   }
 
   Future<List<dynamic>> fetchLocalArticles(int page) async {
@@ -64,19 +60,18 @@ class _LocalArticlesState extends State<LocalArticles> {
         return articles;
       }
     } on DioError catch (e) {
-      if (DioErrorType.RECEIVE_TIMEOUT == e.type ||
-          DioErrorType.CONNECT_TIMEOUT == e.type) {
+      if (DioErrorType.receiveTimeout == e.type ||
+          DioErrorType.connectTimeout == e.type) {
         throw ("Server is not reachable. Please verify your internet connection and try again");
-      } else if (DioErrorType.RESPONSE == e.type) {
-        if (e.response.statusCode == 400) {
+      } else if (DioErrorType.response == e.type) {
+        if (e.response!.statusCode == 400) {
           setState(() {
             _infiniteStop = true;
           });
         } else {
           print(e.message);
-          print(e.request);
         }
-      } else if (DioErrorType.DEFAULT == e.type) {
+      } else if (DioErrorType.other == e.type) {
         if (e.message.contains('SocketException')) {
           throw ('No Internet Connection.');
         }
@@ -90,8 +85,8 @@ class _LocalArticlesState extends State<LocalArticles> {
 
   _scrollListener() {
     if (!this.mounted) return;
-    var isEnd = _controller.offset >= _controller.position.maxScrollExtent &&
-        !_controller.position.outOfRange;
+    var isEnd = _controller!.offset >= _controller!.position.maxScrollExtent &&
+        !_controller!.position.outOfRange;
     if (isEnd) {
       setState(() {
         page += 1;
@@ -119,7 +114,7 @@ class _LocalArticlesState extends State<LocalArticles> {
             controller: _controller,
             child: Column(
               children: <Widget>[
-                categoryPosts(_futureArticles),
+                categoryPosts(_futureArticles as Future<List<dynamic>>),
               ],
             )),
       ),
@@ -131,15 +126,15 @@ class _LocalArticlesState extends State<LocalArticles> {
       future: futureArticles,
       builder: (context, articleSnapshot) {
         if (articleSnapshot.hasData) {
-          if (articleSnapshot.data.length == 0) return Container();
+          if (articleSnapshot.data!.length == 0) return Container();
           return Column(
             children: <Widget>[
               ListView.builder(
-                  itemCount: articleSnapshot.data.length,
+                  itemCount: articleSnapshot.data!.length,
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   itemBuilder: (BuildContext context, int index) {
-                    Article item = articleSnapshot.data[index];
+                    Article item = articleSnapshot.data![index];
                     Random random = new Random();
                     final randNum = random.nextInt(10000);
                     final heroId = item.id.toString() + randNum.toString();
@@ -154,18 +149,6 @@ class _LocalArticlesState extends State<LocalArticles> {
                       },
                       child: Column(
                         children: <Widget>[
-                          ENABLE_ADS && index % 5 == 0
-                              ? Container(
-                                  margin: EdgeInsets.fromLTRB(10, 4, 4, 0),
-                                  child: Card(
-                                    elevation: 6,
-                                    child: AdmobBanner(
-                                      adUnitId: ADMOB_BANNER_ID_1,
-                                      adSize: AdmobBannerSize.LEADERBOARD,
-                                    ),
-                                  ),
-                                )
-                              : Container(),
                           articleBox(context, item, heroId),
                         ],
                       ),
@@ -173,12 +156,7 @@ class _LocalArticlesState extends State<LocalArticles> {
                   }),
               !_infiniteStop
                   ? Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      child: Loading(
-                          indicator: BallBeatIndicator(),
-                          size: 60.0,
-                          color: Theme.of(context).accentColor))
+                      )
                   : Container()
             ],
           );
@@ -186,13 +164,7 @@ class _LocalArticlesState extends State<LocalArticles> {
           return Container();
         }
         return Container(
-            alignment: Alignment.center,
-            height: 400,
-            width: MediaQuery.of(context).size.width - 30,
-            child: Loading(
-                indicator: BallBeatIndicator(),
-                size: 60.0,
-                color: Theme.of(context).accentColor));
+            );
       },
     );
   }

@@ -14,9 +14,9 @@ class FavArticleBloc {
     getFavArticles();
   }
 
-  Future<List<Article>> getFavArticles({String query, int page}) async {
+  Future<List<Article>> getFavArticles({String? query, int? page}) async {
     final List<Article> articles =
-        await _articleRepository.getAllFavArticles(query: query, page: page);
+        await _articleRepository.getAllFavArticles(query: query.toString(), page: page ?? 0);
     _articlesController.sink.add(articles);
     return articles;
   }
